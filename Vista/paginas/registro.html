@@ -28,8 +28,13 @@
                     placeholder="Tu nombre"
                     autocomplete="name"
                     maxlength="100"
+                    pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9 .@_]+"
                     required
+                    
                 >
+                <small class="aviso">
+                        Solo se permiten letras, números, espacios y los caracteres . @ _
+                </small>
 
                 <label for="correo">Correo electrónico</label>
                 <input
@@ -37,10 +42,14 @@
                     id="correo"
                     name="correo"
                     placeholder="usuario@ejemplo.com"
-                    autocomplete="email"
+                    autocomplete="gmail"
                     maxlength="254"
+                    pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9 .@_]+"
                     required
                 >
+                <small class="aviso">
+                        Solo se permiten letras, números, espacios y los caracteres . @ _
+                </small>
 
                 <label for="contrasena">Contraseña</label>
                 <input
@@ -50,9 +59,12 @@
                     placeholder="Mínimo 8 caracteres"
                     autocomplete="new-password"
                     minlength="8"
+                    pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9 .@_]+"
                     required
                 >
-
+                    <small class="aviso">
+                        Solo se permiten letras, números, espacios y los caracteres . @ _
+                    </small>
                 <label for="confirmar">Confirmar contraseña</label>
                 <input
                     type="password"

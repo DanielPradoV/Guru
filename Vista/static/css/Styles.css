@@ -114,3 +114,11 @@ main {
     color: #174ea6;
     font-weight: bold;
 }
+
+.aviso {
+    display: block;
+    margin-top: -6px;
+    margin-bottom: 8px;
+    color: #64748b;
+    font-size: 12px;
+}
