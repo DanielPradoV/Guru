@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru | Crear cuenta</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+    <main class="login-container">
+        <section class="login-card">
+            <h1>Crear cuenta en Guru</h1>
+            <p class="subtitulo">Regístrate para comenzar</p>
+
+            {% if mensaje %}
+                <p role="status">{{ mensaje }}</p>
+            {% endif %}
+
+            <form action="{{ url_for('ventas.registro') }}" method="POST">
+                <label for="nombre">Nombre completo</label>
+                <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    placeholder="Tu nombre"
+                    autocomplete="name"
+                    maxlength="100"
+                    required
+                >
+
+                <label for="correo">Correo electrónico</label>
+                <input
+                    type="email"
+                    id="correo"
+                    name="correo"
+                    placeholder="usuario@ejemplo.com"
+                    autocomplete="email"
+                    maxlength="254"
+                    required
+                >
+
+                <label for="contrasena">Contraseña</label>
+                <input
+                    type="password"
+                    id="contrasena"
+                    name="contrasena"
+                    placeholder="Mínimo 8 caracteres"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+
+                <label for="confirmar">Confirmar contraseña</label>
+                <input
+                    type="password"
+                    id="confirmar"
+                    name="confirmar"
+                    placeholder="Repite tu contraseña"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+
+                <button type="submit">Crear cuenta</button>
+            </form>
+
+            <p class="registro">
+                ¿Ya tienes una cuenta?
+                <a href="{{ url_for('inicio') }}">Inicia sesión</a>
+            </p>
+        </section>
+    </main>
+</body>
+</html>
