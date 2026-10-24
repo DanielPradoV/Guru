@@ -1,5 +1,6 @@
 
 from flask import Flask, render_template
+from ventas_controlador import ventas_bp
 
 app = Flask(
     __name__,
@@ -7,17 +8,23 @@ app = Flask(
     static_folder="Vista/static"
 )
 
-@app.route("/")
+app.register_blueprint(ventas_bp)
+
+
+@app.route("/", methods=["GET", "POST"])
 def inicio():
     return render_template("index.html")
+
 
 @app.route("/productos")
 def productos():
     return render_template("productos.html")
 
+
 @app.route("/carrito")
 def carrito():
     return render_template("carrito.html")
+
 
 @app.route("/nosotros")
 def nosotros():
