@@ -1,6 +1,6 @@
 
 from flask import Flask, render_template
-from ventas_controlador import ventas_bp
+from controlador.ventas_controlador import ventas_bp
 
 app = Flask(
     __name__,
