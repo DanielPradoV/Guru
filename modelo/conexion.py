@@ -1,5 +1,4 @@
 
-
 import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
@@ -16,14 +15,20 @@ db_url = URL.create(
     host=db_host,
     port=int(os.getenv("DB_PORT", "3306")),
     database=os.getenv("DB_NAME", "guru"),
-    query={"ssl": {}} if db_host != "127.0.0.1" else {},
 )
 
-engine = create_engine(
-    db_url,
-    pool_pre_ping=True,
-    pool_recycle=1800,
-)
+engine_options = {
+    "pool_pre_ping": True,
+    "pool_recycle": 1800,
+}
+
+# Activar SSL únicamente para la conexión remota.
+if db_host != "127.0.0.1" and db_host != "localhost":
+    engine_options["connect_args"] = {
+        "ssl": {}
+    }
+
+engine = create_engine(db_url, **engine_options)
 
 
 def probar_conexion():
