@@ -71,9 +71,15 @@ def registro():
                 )
 
             except Exception:
+                from flask import current_app
+
+                current_app.logger.exception(
+                    "Error al registrar usuario en la base de datos"
+                )
+
                 mensaje = (
                     "No se pudo completar el registro. "
-                    "Revisa la conexión con la base de datos."
+                    "Revisa los logs del servidor."
                 )
 
     return render_template(
