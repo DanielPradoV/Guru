@@ -1,11 +1,62 @@
 import re
-from flask import Blueprint, render_template, request
-from werkzeug.security import generate_password_hash
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    session,
+    redirect,
+    url_for,
+    current_app
+)
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
 from modelo.conexion import engine
 ventas_bp = Blueprint("ventas", __name__)
+import secrets
+
+
+@ventas_bp.before_app_request
+def validar_sesion_activa():
+    id_usuario = session.get("id_usuario")
+    token = session.get("token_sesion")
+
+    if id_usuario is None and token is None:
+        return None
+
+    if id_usuario is None or not token:
+        session.clear()
+        return None
+
+    try:
+        with engine.connect() as conexion:
+            sesion_valida = conexion.execute(
+                text("""
+                    SELECT 1
+                    FROM sesion_usuario
+                    WHERE idUsuario = :id_usuario
+                      AND tokenSesion = :token
+                """),
+                {
+                    "id_usuario": id_usuario,
+                    "token": token
+                }
+            ).first()
+
+        if not sesion_valida:
+            session.clear()
+
+    except Exception:
+        current_app.logger.exception(
+            "Error al validar la sesión del usuario"
+        )
+        session.clear()
+
+    return None
 
 
 
@@ -88,6 +139,133 @@ def registro():
         tipo_mensaje=tipo_mensaje
     )
 
+
+@ventas_bp.route("/login", methods=["POST"]) #ESTEEEEEEEEEEE
+def login():
+    correo = request.form.get("correo", "").strip().lower()
+    contrasena = request.form.get("contrasena", "")
+
+    if not correo or not contrasena:
+        return render_template(
+            "index.html",
+            mensaje_login="Ingresa tu correo y contraseña."
+        )
+
+    try:
+        with engine.connect() as conexion:
+            usuario = conexion.execute(
+                text("""
+                    SELECT idUsuario, NombreCompleto, Clave
+                    FROM usuario
+                    WHERE Correo = :correo
+                """),
+                {"correo": correo}
+            ).mappings().first()
+
+        if not usuario or not check_password_hash(
+            usuario["Clave"], contrasena
+        ):
+            return render_template(
+                "index.html",
+                mensaje_login="Correo o contraseña incorrectos."
+            )
+
+        token = secrets.token_urlsafe(32)
+
+        with engine.begin() as conexion:
+            sesion_existente = conexion.execute(
+                text("""
+                    SELECT idSesion
+                    FROM sesion_usuario
+                    WHERE idUsuario = :id_usuario
+                """),
+                {"id_usuario": usuario["idUsuario"]}
+            ).first()
+
+            if sesion_existente:
+                return render_template(
+                    "index.html",
+                    mensaje_login=(
+                        "Esta cuenta ya tiene una sesión activa. "
+                        "Cierra esa sesión antes de volver a ingresar."
+                    )
+                )
+
+            conexion.execute(
+                text("""
+                    INSERT INTO sesion_usuario
+                        (idUsuario, tokenSesion)
+                    VALUES
+                        (:id_usuario, :token)
+                """),
+                {
+                    "id_usuario": usuario["idUsuario"],
+                    "token": token
+                }
+            )
+
+        session.clear()
+        session["id_usuario"] = usuario["idUsuario"]
+        session["token_sesion"] = token
+
+        return redirect(url_for("inicio"))
+
+    
+    except IntegrityError:
+        return render_template(
+            "index.html",
+            mensaje_login=(
+                "Esta cuenta ya tiene una sesión activa. "
+                "Cierra esa sesión antes de volver a ingresar."
+            )
+        )
+
+
+    except Exception:
+        current_app.logger.exception(
+            "Error durante el inicio de sesión"
+        )
+        return render_template(
+            "index.html",
+            mensaje_login=(
+                "No se pudo iniciar sesión. Inténtalo más tarde."
+            )
+        )
+
+
+@ventas_bp.route("/logout", methods=["POST"])
+def logout():
+    id_usuario = session.get("id_usuario")
+    token = session.get("token_sesion")
+
+    try:
+        if id_usuario is not None and token:
+            with engine.begin() as conexion:
+                conexion.execute(
+                    text("""
+                        DELETE FROM sesion_usuario
+                        WHERE idUsuario = :id_usuario
+                          AND tokenSesion = :token
+                    """),
+                    {
+                        "id_usuario": id_usuario,
+                        "token": token
+                    }
+                )
+
+    except Exception:
+        current_app.logger.exception(
+            "Error al cerrar la sesión del usuario"
+        )
+        return (
+            "No se pudo cerrar la sesión. Inténtalo de nuevo.",
+            500
+        )
+
+    finally:
+        session.clear()
+
+    return redirect(url_for("inicio"))
 
 @ventas_bp.route("/registro-vendedor", methods=["GET", "POST"])
 def registro_vendedor():

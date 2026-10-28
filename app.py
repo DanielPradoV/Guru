@@ -1,4 +1,4 @@
-
+import os
 from flask import Flask, render_template
 from controlador.ventas_controlador import ventas_bp
 
@@ -7,6 +7,14 @@ app = Flask(
     template_folder="Vista/paginas",
     static_folder="Vista/static"
 )
+
+app.secret_key = os.getenv("SECRET_KEY")
+
+if not app.secret_key:
+    raise RuntimeError(
+        "Falta configurar la variable de entorno SECRET_KEY."
+    )
+
 
 app.register_blueprint(ventas_bp)
 
