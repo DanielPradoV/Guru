@@ -208,7 +208,7 @@ def login():
         session["id_usuario"] = usuario["idUsuario"]
         session["token_sesion"] = token
 
-        return redirect(url_for("inicio"))
+        return redirect(url_for("principal"))
 
     
     except IntegrityError:

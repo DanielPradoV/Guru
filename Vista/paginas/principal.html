@@ -1,0 +1,33 @@
+ 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru | Mi cuenta</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Guru</h1>
+        <nav>
+            <a href="{{ url_for('principal') }}">Mi cuenta</a>
+            <a href="{{ url_for('productos') }}">Productos</a>
+            <a href="{{ url_for('carrito') }}">Carrito</a>
+            <a href="{{ url_for('nosotros') }}">Nosotros</a>
+        </nav>
+    </header>
+
+    <main class="login-container">
+        <section class="login-card">
+            <h1>¡Bienvenido a Guru!</h1>
+            <p>Has iniciado sesión correctamente.</p>
+
+            <form action="{{ url_for('ventas.logout') }}" method="POST">
+                <button type="submit">Cerrar sesión</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, session, redirect, url_for
 from controlador.ventas_controlador import ventas_bp
 
 app = Flask(
@@ -23,6 +23,12 @@ app.register_blueprint(ventas_bp)
 def inicio():
     return render_template("index.html")
 
+@app.route("/principal")
+def principal():
+    if "id_usuario" not in session:
+        return redirect(url_for("inicio"))
+
+    return render_template("principal.html")
 
 @app.route("/productos")
 def productos():
