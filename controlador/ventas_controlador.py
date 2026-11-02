@@ -1,6 +1,8 @@
 
 import os
+import csv
 import hashlib
+import json
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import resend
@@ -14,7 +16,9 @@ from flask import (
     session,
     redirect,
     url_for,
-    current_app
+    current_app,
+    jsonify,
+    send_from_directory,
 )
 
 from werkzeug.security import (
@@ -719,3 +723,94 @@ def registro_vendedor():
         "registro_vendedor.html",
         mensaje=mensaje
     )
+
+
+# ---------------------------------------------------------------
+# Carrito de compras de la página principal (estilo Dalliat)
+# ---------------------------------------------------------------
+
+DESCARGAS_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "descargas"
+)
+
+NOMBRE_PEDIDO_RE = re.compile(r"^pedido_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.csv$")
+
+
+@ventas_bp.route("/comprar", methods=["POST"])
+def comprar():
+
+    if "id_usuario" not in session:
+        return jsonify(
+            success=False, error="La sesión expiró. Inicia sesión de nuevo."
+        ), 401
+
+    try:
+        productos = json.loads(request.form.get("productos", "[]"))
+    except (ValueError, TypeError):
+        return jsonify(success=False, error="Datos inválidos."), 400
+
+    if not isinstance(productos, list) or not (1 <= len(productos) <= 100):
+        return jsonify(
+            success=False, error="El carrito debe tener entre 1 y 100 ítems."
+        ), 400
+
+    limpio = []
+    for p in productos:
+        if isinstance(p, dict) and p.get("nombre"):
+            limpio.append({
+                "nombre": str(p["nombre"])[:120],
+                "precio": str(p.get("precio", ""))[:30],
+            })
+
+    if not limpio:
+        return jsonify(success=False, error="Carrito vacío."), 400
+
+    nombre_csv = (
+        "pedido_"
+        + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        + ".csv"
+    )
+
+    try:
+        os.makedirs(DESCARGAS_DIR, exist_ok=True)
+        with open(
+            os.path.join(DESCARGAS_DIR, nombre_csv),
+            "w", newline="", encoding="utf-8",
+        ) as archivo_csv:
+            escritor = csv.writer(archivo_csv)
+            escritor.writerow(["nombre", "precio"])
+            for p in limpio:
+                escritor.writerow([p["nombre"], p["precio"]])
+    except Exception:
+        current_app.logger.exception("Error al generar el pedido CSV")
+        return jsonify(
+            success=False, error="No se pudo registrar la compra."
+        ), 500
+
+    registrar_accion(
+        "pedido_compra",
+        f"{len(limpio)} productos: "
+        + ", ".join(p["nombre"] for p in limpio)[:180],
+    )
+
+    return jsonify(
+        success=True,
+        message=(
+            f"Compra registrada: {len(limpio)} productos."
+        ),
+        excel=nombre_csv,
+    )
+
+
+@ventas_bp.route("/descargas/<nombre>")
+def descargar_pedido(nombre):
+
+    if "id_usuario" not in session:
+        return redirect(url_for("inicio"))
+
+    # El nombre solo puede ser el generado por el propio servidor.
+    if not NOMBRE_PEDIDO_RE.fullmatch(nombre):
+        return "Nombre de archivo inválido.", 400
+
+    return send_from_directory(DESCARGAS_DIR, nombre, as_attachment=True)

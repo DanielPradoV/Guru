@@ -20,6 +20,17 @@ Press CTRL+C to quit
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 125-335-282
-127.0.0.1 - - [01/Nov/2026 23:10:13] "GET /recuperar-contrasena HTTP/1.1" 200 -
-127.0.0.1 - - [01/Nov/2026 23:10:13] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [01/Nov/2026 23:10:24] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:29:15] "POST /registro HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:29:15] "POST /login HTTP/1.1" 302 -
+127.0.0.1 - - [01/Nov/2026 23:29:15] "GET /principal HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:29:15] "GET /static/css/dalliat.css HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:29:16] "GET /static/img/right.png HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:29:16] "GET /static/img/1.png HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:29:16] "GET /static/js/script.js HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:29:16] "POST /comprar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:29:42] "GET /descargas/pedido_2026-11-01_23-29-16.csv HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:29:42] "GET /descargas/pedido_2026-11-01_23-29-16.csv HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:29:42] "GET /descargas/..%2F.env HTTP/1.1" 404 -
+127.0.0.1 - - [01/Nov/2026 23:29:58] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:30:09] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Nov/2026 23:30:17] "GET / HTTP/1.1" 200 -

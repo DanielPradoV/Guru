@@ -2,12 +2,12 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #0f7eec;
+    background-color: #e2ad1b;
     color: #263238;
 }
 
 header {
-    background-color: #174ea6;
+    background-color: #111111;
     color: white;
     padding: 20px;
     text-align: center;
@@ -35,7 +35,7 @@ main {
 .boton {
     display: inline-block;
     padding: 12px 20px;
-    background-color: #174ea6;
+    background-color: #111111;
     color: white;
     border-radius: 6px;
     text-decoration: none;
@@ -62,7 +62,7 @@ main {
 
 .login-card h1 {
     margin-bottom: 8px;
-    color: #174ea6;
+    color: #111111;
     text-align: center;
 }
 
@@ -94,14 +94,14 @@ main {
     padding: 13px;
     border: none;
     border-radius: 6px;
-    background: #174ea6;
+    background: #111111;
     color: white;
     font-size: 16px;
     cursor: pointer;
 }
 
 .login-card button:hover {
-    background: #123d82;
+    background: #8b6c15;
 }
 
 .registro {
@@ -111,7 +111,7 @@ main {
 }
 
 .registro a {
-    color: #174ea6;
+    color: #111111;
     font-weight: bold;
 }
 

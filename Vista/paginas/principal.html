@@ -1,48 +1,364 @@
- 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guru | Mi cuenta</title>
+    <title>Guru</title>
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/Styles.css') }}">
+          href="{{ url_for('static', filename='css/dalliat.css') }}">
+    <script src="https://unpkg.com/@formkit/auto-animate"></script>
+    <style>
+        .menu .navbar form { display: inline; margin: 0; }
+        .nav-enlace {
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 18px;
+            padding: 20px;
+            color: #111111;
+            cursor: pointer;
+            display: block;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Guru</h1>
-        <nav>
-            <a href="{{ url_for('principal') }}">Mi cuenta</a>
-            <a href="{{ url_for('productos') }}">Productos</a>
-            <a href="{{ url_for('carrito') }}">Carrito</a>
-            <a href="{{ url_for('nosotros') }}">Nosotros</a>
-            <a href="{{ url_for('cuenta.perfil') }}">Perfil</a>
-            <a href="{{ url_for('cuenta.subidas') }}">Mis archivos</a>
-            {% if 'gestionar_usuarios' in permisos %}
-                <a href="{{ url_for('admin.usuarios') }}">Usuarios</a>
-            {% endif %}
-            {% if 'gestionar_roles' in permisos %}
-                <a href="{{ url_for('admin.roles') }}">Roles</a>
-            {% endif %}
-            {% if 'ver_auditoria' in permisos %}
-                <a href="{{ url_for('admin.auditoria') }}">Auditoría</a>
-            {% endif %}
-        </nav>
+    <header class="header">
+        <div class="menu container">
+            <a href="{{ url_for('principal') }}" class="logo">Guru</a>
+            <input type="checkbox" id="menu" />
+            <label for="menu">
+                <img src="{{ url_for('static', filename='img/menu.png') }}"
+                     class="menu-icono" alt="menu">
+            </label>
+            <nav class="navbar">
+                <ul>
+                    <li><a href="{{ url_for('principal') }}">Inicio</a></li>
+                    <li><a href="#ofert">Servicio</a></li>
+                    <li><a href="#lista-1">productos</a></li>
+                    <li><a href="{{ url_for('cuenta.perfil') }}">Mi cuenta</a></li>
+                    <li><a href="{{ url_for('cuenta.subidas') }}">Mis archivos</a></li>
+                    {% if 'gestionar_usuarios' in permisos %}
+                        <li><a href="{{ url_for('admin.usuarios') }}">Usuarios</a></li>
+                    {% endif %}
+                    {% if 'gestionar_roles' in permisos %}
+                        <li><a href="{{ url_for('admin.roles') }}">Roles</a></li>
+                    {% endif %}
+                    {% if 'ver_auditoria' in permisos %}
+                        <li><a href="{{ url_for('admin.auditoria') }}">Auditoría</a></li>
+                    {% endif %}
+                    <li>
+                        <form action="{{ url_for('ventas.logout') }}"
+                              method="POST">
+                            <button type="submit" class="nav-enlace">
+                                Cerrar sesion
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+            <div>
+                <ul>
+                    <li class="submenu">
+                        <img src="{{ url_for('static', filename='img/car.svg') }}"
+                             id="img-carrito" alt="carrito">
+                        <div id="carrito">
+                            <table id="lista-carrito">
+                                <thead>
+                                    <tr>
+                                        <th>imagen</th>
+                                        <th>nombre</th>
+                                        <th>precio</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <a href="#" id="vaciar-carrito"
+                               class="btn-2">Vaciar carrito</a>
+                            <a href="#" id="comprar-carrito"
+                               class="btn-2">Comprar carrito</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="header-content Container">
+            <div class="header-img">
+                <img src="{{ url_for('static', filename='img/right.png') }}"
+                     alt="">
+            </div>
+            <div class="header-txt">
+                <h1>Ofertas Especiales</h1>
+                <p>estrena las mejores prendas</p>
+                <a href="#lista-1" class="btn-1">informacion</a>
+            </div>
+        </div>
     </header>
+    <!-- Fin del header -->
 
-    <main class="login-container">
-        <section class="login-card">
-            <h1>¡Bienvenido a Guru!</h1>
-            <p>Has iniciado sesión correctamente.</p>
-            <p class="subtitulo">
-                Tu sesión vence tras
-                {{ session_timeout_minutes }} minutos de inactividad.
-            </p>
+    <section class="ofert" id="ofert">
+        <div class="ofert-1">
+            <div class="ofert-img">
+                <img src="{{ url_for('static', filename='img/f1.png') }}"
+                     alt="">
+            </div>
+            <div class="odert-txt">
+                <h3>producto 1</h3>
+                <a href="#lista-1" class="btn-2">informacion</a>
+            </div>
+        </div>
 
-            <form action="{{ url_for('ventas.logout') }}" method="POST">
-                <button type="submit">Cerrar sesión</button>
-            </form>
-        </section>
+        <div class="ofert-1">
+            <div class="ofert-img">
+                <img src="{{ url_for('static', filename='img/f2.png') }}"
+                     alt="">
+            </div>
+            <div class="odert-txt">
+                <h3>producto 2</h3>
+                <a href="#lista-1" class="btn-2">informacion</a>
+            </div>
+        </div>
+
+        <div class="ofert-1">
+            <div class="ofert-img">
+                <img src="{{ url_for('static', filename='img/f3.png') }}"
+                     alt="">
+            </div>
+            <div class="odert-txt">
+                <h3>producto 3</h3>
+                <a href="#lista-1" class="btn-2">informacion</a>
+            </div>
+        </div>
+    </section>
+
+    <main class="products container" id="lista-1">
+        <h2>productos</h2>
+
+        <div class="product-content">
+            <div class="product">
+                <img src="{{ url_for('static', filename='img/1.png') }}"
+                     alt="">
+                <div class="product-txt">
+                    <h3 class="producto">Shein</h3>
+                    <p>calidad premium</p>
+                    <p class="precio">Suscribase para ver precios</p>
+                    <a href="#" class="agregar-carrito btn-2"
+                       data-id="1">Agregar al carrito</a>
+                </div>
+            </div>
+
+            <div class="product">
+                <img src="{{ url_for('static', filename='img/2.png') }}"
+                     alt="">
+                <div class="product-txt">
+                    <h3 class="producto">Temu</h3>
+                    <p>calidad premium</p>
+                    <p class="precio">Suscribase para ver precios</p>
+                    <a href="#" class="agregar-carrito btn-2"
+                       data-id="2">Agregar al carrito</a>
+                </div>
+            </div>
+
+            <div class="product">
+                <img src="{{ url_for('static', filename='img/3.png') }}"
+                     alt="">
+                <div class="product-txt">
+                    <h3 class="producto">Totto</h3>
+                    <p>calidad premium</p>
+                    <p class="precio">Suscribase para ver precios</p>
+                    <a href="#" class="agregar-carrito btn-2"
+                       data-id="3">Agregar al carrito</a>
+                </div>
+            </div>
+
+            <div class="product">
+                <img src="{{ url_for('static', filename='img/4.png') }}"
+                     alt="">
+                <div class="product-txt">
+                    <h3 class="producto">Elysium</h3>
+                    <p>calidad premium</p>
+                    <p class="precio">Suscribase para ver precios</p>
+                    <a href="#" class="agregar-carrito btn-2"
+                       data-id="4">Agregar al carrito</a>
+                </div>
+            </div>
+
+            <div class="product">
+                <img src="{{ url_for('static', filename='img/5.png') }}"
+                     alt="">
+                <div class="product-txt">
+                    <h3 class="producto">Versache</h3>
+                    <p>calidad premium</p>
+                    <p class="precio">Suscribase para ver precios</p>
+                    <a href="#" class="agregar-carrito btn-2"
+                       data-id="5">Agregar al carrito</a>
+                </div>
+            </div>
+
+            <div class="product">
+                <img src="{{ url_for('static', filename='img/6.png') }}"
+                     alt="">
+                <div class="product-txt">
+                    <h3 class="producto">Gaban</h3>
+                    <p>calidad premium</p>
+                    <p class="precio">$100</p>
+                    <a href="#" class="agregar-carrito btn-2"
+                       data-id="6">Agregar al carrito</a>
+                </div>
+            </div>
+        </div>
     </main>
+    <!-- fin del main -->
+
+    <section class="icons container">
+        <div class="icon-1">
+            <div class="icon-img">
+                <img src="{{ url_for('static', filename='img/i1.svg') }}"
+                     alt="">
+            </div>
+            <div class="icon-txt">
+                <h3>Lo mejor este verano</h3>
+            </div>
+            <p>
+                Promociones en trajes de baño
+            </p>
+        </div>
+
+        <div class="icon-1">
+            <div class="icon-img">
+                <img src="{{ url_for('static', filename='img/i2.svg') }}"
+                     alt="">
+            </div>
+            <div class="icon-txt">
+                <h3>tendencias</h3>
+            </div>
+            <p>
+                Prueba lo ultimo de la moda
+            </p>
+        </div>
+
+        <div class="icon-1">
+            <div class="icon-img">
+                <img src="{{ url_for('static', filename='img/i3.svg') }}"
+                     alt="">
+            </div>
+            <div class="icon-txt">
+                <h3>En sintonia con el ambiente</h3>
+            </div>
+            <p>
+                Tenemos lo ultimo en telas biodegradables
+            </p>
+        </div>
+    </section>
+    <!-- Fin seccion de iconos -->
+
+    <section class="blog container">
+        <div class="blog-1">
+            <img src="{{ url_for('static', filename='img/b1.jpg') }}"
+                 alt="">
+            <h3>Blog  1</h3>
+            <p>
+                Lo ultimo en telas de alta calidad producidas en bogota
+            </p>
+        </div>
+
+        <div class="blog-1">
+            <img src="{{ url_for('static', filename='img/b2.jpg') }}"
+                 alt="">
+            <h3>Blog  2</h3>
+            <p>
+                Textiles producidos por emprendedores locales
+            </p>
+        </div>
+
+        <div class="blog-1">
+            <img src="{{ url_for('static', filename='img/b3.jpg') }}"
+                 alt="">
+            <h3>Blog  3</h3>
+            <p>
+                Lo mejor solo para ti
+            </p>
+        </div>
+    </section>
+
+    <!-- pie de pagina -->
+    <footer class="footer">
+        <div class="footer-content container">
+            <div class="link">
+                <h3>Guru</h3>
+                <ul>
+                    <li><a href="{{ url_for('cuenta.perfil') }}">Mi cuenta</a></li>
+                    <li><a href="{{ url_for('cuenta.subidas') }}">Mis archivos</a></li>
+                    <li><a href="{{ url_for('cuenta.recuperar_contrasena') }}">Recuperar clave</a></li>
+                </ul>
+            </div>
+            <div class="link">
+                <h3>Sesion</h3>
+                <ul>
+                    <li><a href="#">{{ session_timeout_minutes }} min de inactividad</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('comprar-carrito').addEventListener(
+            'click', function(e) {
+                e.preventDefault();
+
+                const productos = [];
+                const items = document.querySelectorAll(
+                    '#lista-carrito tbody tr'
+                );
+
+                items.forEach(item => {
+                    const nombre = item.querySelector(
+                        'td:nth-child(2)').textContent;
+                    const precio = item.querySelector(
+                        'td:nth-child(3)').textContent.replace('$', '');
+                    productos.push({ nombre, precio });
+                });
+
+                if (productos.length === 0) {
+                    alert('El carrito está vacío');
+                    return;
+                }
+
+                fetch('{{ url_for("ventas.comprar") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'application/x-www-form-urlencoded',
+                    },
+                    body: 'productos=' + encodeURIComponent(
+                        JSON.stringify(productos))
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        if (data.excel) {
+                            const link = document.createElement('a');
+                            link.href = '{{ url_for("ventas.descargar_pedido", nombre="__X__") }}'.replace('__X__', data.excel);
+                            link.download = data.excel;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        }
+                        document.querySelector(
+                            '#lista-carrito tbody').innerHTML = '';
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al procesar la compra: '
+                        + error.message);
+                });
+            }
+        );
+    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
