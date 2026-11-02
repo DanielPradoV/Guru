@@ -162,6 +162,18 @@ def ensure_esquema():
         agregar_columna(c, "sesion_usuario", "fechaExpiracion", "DATETIME NULL")
         agregar_columna(c, "sesion_usuario", "fechaUltimaActividad", "DATETIME NULL")
 
+        # Las sesiones sin fecha de expiración son previas a esta migración:
+        # nunca vencerían y bloquearían el nuevo inicio de sesión del usuario.
+        borrar_muertas = c.execute(
+            text("""
+                DELETE FROM sesion_usuario
+                WHERE fechaExpiracion IS NULL
+                   OR fechaExpiracion <= UTC_TIMESTAMP()
+            """)
+        )
+        if borrar_muertas.rowcount:
+            print(f"  - {borrar_muertas.rowcount} sesiones muertas depuradas")
+
         print("Sembrando permisos...")
         for codigo, descripcion in PERMISOS:
             c.execute(

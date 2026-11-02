@@ -342,8 +342,8 @@ def validar_sesion_activa():
             sesion = conexion.execute(
                 text("""
                     SELECT idSesion,
-                           (fechaExpiracion IS NOT NULL
-                            AND fechaExpiracion <= UTC_TIMESTAMP()) AS expiro
+                           (fechaExpiracion IS NULL
+                            OR fechaExpiracion <= UTC_TIMESTAMP()) AS expiro
                     FROM sesion_usuario
                     WHERE idUsuario = :id_usuario
                       AND tokenSesion = :token
@@ -599,6 +599,19 @@ def login():
                 )
 
                 nuevo_token = secrets.token_urlsafe(32)
+
+                # Una sesión muerta no puede bloquear el acceso: las filas
+                # caducadas, y las heredadas sin fechaExpiracion (anteriores
+                # a la migración), se depuran antes de buscar la activa.
+                conexion.execute(
+                    text("""
+                        DELETE FROM sesion_usuario
+                        WHERE idUsuario = :id_usuario
+                          AND (fechaExpiracion IS NULL
+                               OR fechaExpiracion <= UTC_TIMESTAMP())
+                    """),
+                    {"id_usuario": usuario["idUsuario"]}
+                )
 
                 sesion_existente = conexion.execute(
                     text("""
