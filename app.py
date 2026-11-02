@@ -51,6 +51,16 @@ _handler.setLevel(logging.INFO)
 app.logger.addHandler(_handler)
 app.logger.setLevel(logging.INFO)
 
+# El esquema de la base de datos se asegura al arrancar: es una migración
+# aditiva e idempotente, necesaria en despliegues donde no hay shell.
+try:
+    from modelo.migraciones import ensure_esquema
+    ensure_esquema()
+except Exception:
+    app.logger.exception(
+        "No se pudo aplicar la migración del esquema al arrancar"
+    )
+
 app.register_blueprint(ventas_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(cuenta_bp)

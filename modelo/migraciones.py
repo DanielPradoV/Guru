@@ -4,13 +4,9 @@ Crea tablas y columnas nuevas (roles, permisos, auditoría, bloqueo,
 expiración de sesión, restablecimiento de clave, archivos). Es idempotente:
 puede ejecutarse varias veces sin duplicar nada ni destruir datos.
 
-Uso:  python scripts/inicializar_bd.py
+Se aplica automáticamente al arrancar la aplicación y también puede
+ejecutarse a mano:  python -m modelo.migraciones
 """
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
 from sqlalchemy import text
 from modelo.conexion import engine
 
@@ -133,7 +129,7 @@ ROLES_BASE = {"Usuario": ["ver_productos", "subir_archivos"]}
 ROL_ADMIN = "Administrador"
 
 
-def main():
+def ensure_esquema():
     with engine.begin() as c:
         print("Creando tablas nuevas...")
         for nombre, ddl in DDL:
@@ -219,4 +215,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    ensure_esquema()
