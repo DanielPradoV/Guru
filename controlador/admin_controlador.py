@@ -1,4 +1,6 @@
-"""Blueprint de administración: usuarios, roles, permisos y auditoría."""
+"""Blueprint de administración: usuarios, roles, permisos, auditoría y métricas."""
+from datetime import datetime, timedelta, timezone
+
 from flask import (
     Blueprint,
     current_app,
@@ -21,6 +23,8 @@ from controlador.seguridad import (
 )
 
 admin_bp = Blueprint("admin", __name__)
+
+DIAS_ESTADISTICAS = 14
 
 
 # -----------------------------------------------------------------
@@ -336,3 +340,124 @@ def auditoria():
         filas = []
 
     return render_template("auditoria.html", eventos=filas, filtro=filtro)
+
+
+# -----------------------------------------------------------------
+# Métricas de uso: visitas y tiempo de permanencia
+# -----------------------------------------------------------------
+
+@admin_bp.route("/admin/estadisticas")
+@requiere_permiso("ver_auditoria")
+def estadisticas():
+
+    etiquetas, visitas, personas, minutos = [], [], [], []
+    totales = {}
+    recientes = []
+    sesiones_activas = 0
+
+    try:
+        with engine.connect() as conexion:
+
+            serie = conexion.execute(
+                text("""
+                    SELECT DATE(fechaInicio) AS dia,
+                           COUNT(*) AS visitas,
+                           COUNT(DISTINCT idUsuario) AS personas,
+                           ROUND(AVG(
+                               TIMESTAMPDIFF(SECOND, fechaInicio,
+                                             COALESCE(fechaFin,
+                                                     fechaInicio))
+                           ) / 60.0, 1) AS minutos
+                    FROM visita
+                    WHERE fechaInicio >= DATE_SUB(
+                              UTC_TIMESTAMP(), INTERVAL :dias DAY)
+                    GROUP BY DATE(fechaInicio)
+                    ORDER BY dia
+                """),
+                {"dias": DIAS_ESTADISTICAS}
+            ).mappings().fetchall()
+
+            acumulado = conexion.execute(
+                text("""
+                    SELECT COUNT(*) AS visitas,
+                           COUNT(DISTINCT idUsuario) AS personas,
+                           ROUND(AVG(
+                               TIMESTAMPDIFF(SECOND, fechaInicio,
+                                             COALESCE(fechaFin,
+                                                     fechaInicio))
+                           ) / 60.0, 1) AS minutos_promedio,
+                           ROUND(MAX(
+                               TIMESTAMPDIFF(SECOND, fechaInicio,
+                                             COALESCE(fechaFin,
+                                                     fechaInicio))
+                           ) / 60.0, 1) AS minutos_maximo
+                    FROM visita
+                """)
+            ).mappings().first()
+
+            por_usuario = conexion.execute(
+                text("""
+                    SELECT u.Usuario, u.NombreCompleto,
+                           COUNT(*) AS visitas,
+                           ROUND(SUM(
+                               TIMESTAMPDIFF(SECOND, v.fechaInicio,
+                                             COALESCE(v.fechaFin,
+                                                     v.fechaInicio))
+                           ) / 60.0, 1) AS minutos
+                    FROM visita v
+                    JOIN usuario u ON u.idUsuario = v.idUsuario
+                    GROUP BY v.idUsuario
+                    ORDER BY minutos DESC
+                    LIMIT 10
+                """)
+            ).mappings().fetchall()
+
+            sesiones_activas = conexion.execute(
+                text("""
+                    SELECT COUNT(*) FROM sesion_usuario
+                    WHERE fechaExpiracion IS NULL
+                       OR fechaExpiracion > UTC_TIMESTAMP()
+                """)
+            ).scalar() or 0
+
+            recientes = conexion.execute(
+                text("""
+                    SELECT u.Usuario, v.fechaInicio, v.fechaFin,
+                           TIMESTAMPDIFF(SECOND, v.fechaInicio,
+                                         COALESCE(v.fechaFin,
+                                                 v.fechaInicio)) AS segundos
+                    FROM visita v
+                    JOIN usuario u ON u.idUsuario = v.idUsuario
+                    ORDER BY v.fechaInicio DESC
+                    LIMIT 30
+                """)
+            ).mappings().fetchall()
+
+    except Exception:
+        current_app.logger.exception("Error al calcular las estadísticas")
+        serie, acumulado, por_usuario = [], {}, []
+
+    por_dia = {str(fila["dia"]): fila for fila in serie}
+    hoy = datetime.now(timezone.utc).date()
+    for i in range(DIAS_ESTADISTICAS - 1, -1, -1):
+        dia = (hoy - timedelta(days=i)).isoformat()
+        fila = por_dia.get(dia)
+        etiquetas.append((hoy - timedelta(days=i)).strftime("%d/%m"))
+        visitas.append(fila["visitas"] if fila else 0)
+        personas.append(fila["personas"] if fila else 0)
+        minutos.append(float(fila["minutos"]) if fila else 0)
+
+    totales = dict(acumulado or {})
+    totales["sesiones_activas"] = sesiones_activas
+
+    return render_template(
+        "estadisticas.html",
+        etiquetas=etiquetas,
+        visitas=visitas,
+        personas=personas,
+        minutos=minutos,
+        totales=totales,
+        por_usuario=por_usuario,
+        recientes=recientes,
+        dias=DIAS_ESTADISTICAS,
+    )

@@ -1,8 +1,9 @@
 """Migración aditiva del esquema de Guru.
 
 Crea tablas y columnas nuevas (roles, permisos, auditoría, bloqueo,
-expiración de sesión, restablecimiento de clave, archivos). Es idempotente:
-puede ejecutarse varias veces sin duplicar nada ni destruir datos.
+expiración de sesión, restablecimiento de clave, archivos, visitas). Es
+idempotente: puede ejecutarse varias veces sin duplicar nada ni destruir
+datos.
 
 Se aplica automáticamente al arrancar la aplicación y también puede
 ejecutarse a mano:  python -m modelo.migraciones
@@ -111,6 +112,17 @@ DDL = [
             fechaSubida TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             CONSTRAINT fk_archivo_usuario FOREIGN KEY (idUsuario)
                 REFERENCES usuario (idUsuario) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    """),
+    ("visita", """
+        CREATE TABLE IF NOT EXISTS visita (
+            idVisita INT AUTO_INCREMENT PRIMARY KEY,
+            idUsuario INT NOT NULL,
+            fechaInicio DATETIME NOT NULL,
+            fechaFin DATETIME NULL,
+            CONSTRAINT fk_visita_usuario FOREIGN KEY (idUsuario)
+                REFERENCES usuario (idUsuario) ON DELETE CASCADE,
+            INDEX idx_visita_inicio (fechaInicio)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     """),
 ]

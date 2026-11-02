@@ -233,3 +233,45 @@ main {
     font-size: 11px;
     padding: 2px 6px;
 }
+
+/* --- Estadísticas de uso --- */
+.tarjetas-metricas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.metrica {
+    flex: 1 1 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #f5f5f5;
+    border-left: 4px solid #e2ad1b;
+}
+
+.metrica-valor {
+    font-family: 'oswald', sans-serif;
+    font-size: 26px;
+    color: #111111;
+}
+
+.metrica-etiqueta {
+    font-size: 12px;
+    color: #8b6c15;
+    text-transform: uppercase;
+}
+
+.grafica-contenedor {
+    position: relative;
+    height: 340px;
+    margin-bottom: 28px;
+}
+
+.panel h2 {
+    color: #111111;
+    margin: 24px 0 12px;
+}

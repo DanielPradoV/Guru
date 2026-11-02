@@ -45,6 +45,7 @@
                     {% endif %}
                     {% if 'ver_auditoria' in permisos %}
                         <li><a href="{{ url_for('admin.auditoria') }}">Auditoría</a></li>
+                        <li><a href="{{ url_for('admin.estadisticas') }}">Estadísticas</a></li>
                     {% endif %}
                     <li>
                         <form action="{{ url_for('ventas.logout') }}"
@@ -358,6 +359,27 @@
                 });
             }
         );
+    </script>
+    <script>
+        // Latido de sesión: mientras la pestaña esté abierta registra la
+        // permanencia del visitante y renueva la ventana de inactividad.
+        (function () {
+            const ruta_latido = "{{ url_for('ventas.keepalive') }}";
+            const ruta_inicio = "{{ url_for('inicio') }}";
+
+            function latido() {
+                if (document.hidden) return;
+                fetch(ruta_latido, { method: "POST" })
+                    .then(function (respuesta) {
+                        if (respuesta.status === 401) {
+                            window.location = ruta_inicio;
+                        }
+                    })
+                    .catch(function () { /* sin red: el siguiente latido intenta */ });
+            }
+
+            setInterval(latido, 60000);
+        })();
     </script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru | Estadísticas</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Guru</h1>
+        <nav>
+            <a href="{{ url_for('principal') }}">Mi cuenta</a>
+            <a href="{{ url_for('admin.usuarios') }}">Usuarios</a>
+            <a href="{{ url_for('admin.roles') }}">Roles</a>
+            <a href="{{ url_for('admin.auditoria') }}">Auditoría</a>
+            <a href="{{ url_for('admin.estadisticas') }}">Estadísticas</a>
+        </nav>
+    </header>
+    <main>
+        <section class="panel">
+            <h1>Visitas y tiempo de permanencia</h1>
+            <p class="subtitulo">
+                Últimos {{ dias }} días. La permanencia se mide desde el
+                inicio de sesión hasta la última actividad registrada de
+                cada visita.
+            </p>
+
+            <div class="tarjetas-metricas">
+                <div class="metrica">
+                    <span class="metrica-valor">{{ totales.get('visitas', 0) }}</span>
+                    <span class="metrica-etiqueta">Visitas totales</span>
+                </div>
+                <div class="metrica">
+                    <span class="metrica-valor">{{ totales.get('personas', 0) }}</span>
+                    <span class="metrica-etiqueta">Personas distintas</span>
+                </div>
+                <div class="metrica">
+                    <span class="metrica-valor">{{ totales.get('minutos_promedio', 0) }} min</span>
+                    <span class="metrica-etiqueta">Promedio por visita</span>
+                </div>
+                <div class="metrica">
+                    <span class="metrica-valor">{{ totales.get('minutos_maximo', 0) }} min</span>
+                    <span class="metrica-etiqueta">Permanencia más larga</span>
+                </div>
+                <div class="metrica">
+                    <span class="metrica-valor">{{ totales.get('sesiones_activas', 0) }}</span>
+                    <span class="metrica-etiqueta">Sesiones activas ahora</span>
+                </div>
+            </div>
+
+            <div class="grafica-contenedor">
+                <canvas id="grafica-visitas"></canvas>
+            </div>
+
+            {% if por_usuario %}
+                <h2>Ranking de permanencia</h2>
+                <table class="lista">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Visitas</th>
+                        <th>Minutos acumulados</th>
+                    </tr>
+                    {% for f in por_usuario %}
+                        <tr>
+                            <td>{{ f.Usuario }}</td>
+                            <td>{{ f.NombreCompleto }}</td>
+                            <td>{{ f.visitas }}</td>
+                            <td>{{ f.minutos }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+
+            {% if recientes %}
+                <h2>Últimas visitas</h2>
+                <table class="lista">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Inicio (UTC)</th>
+                        <th>Última actividad (UTC)</th>
+                        <th>Permanencia</th>
+                    </tr>
+                    {% for v in recientes %}
+                        <tr>
+                            <td>{{ v.Usuario }}</td>
+                            <td>{{ v.fechaInicio }}</td>
+                            <td>{{ v.fechaFin if v.fechaFin else '—' }}</td>
+                            <td>{{ '%d min' % (v.segundos // 60) }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>Todavía no hay visitas registradas.</p>
+            {% endif %}
+        </section>
+    </main>
+    <script>
+        const datos = {
+            etiquetas: {{ etiquetas | tojson }},
+            visitas: {{ visitas | tojson }},
+            personas: {{ personas | tojson }},
+            minutos: {{ minutos | tojson }},
+        };
+
+        new Chart(document.getElementById('grafica-visitas'), {
+            data: {
+                labels: datos.etiquetas,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Personas que entraron',
+                        data: datos.personas,
+                        backgroundColor: '#e2ad1b',
+                        yAxisID: 'y',
+                    },
+                    {
+                        type: 'line',
+                        label: 'Minutos de permanencia',
+                        data: datos.minutos,
+                        borderColor: '#111111',
+                        backgroundColor: '#8b6c15',
+                        tension: 0.3,
+                        yAxisID: 'y1',
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Personas' },
+                    },
+                    y1: {
+                        beginAtZero: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        title: { display: true, text: 'Minutos' },
+                    },
+                },
+            },
+        });
+    </script>
+</body>
+</html>

@@ -296,6 +296,33 @@ def reenviar_verificacion():
 
 
 
+# Visitas: cada inicio de sesión abre una fila en `visita` y cada request
+# de ese usuario mueve fechaFin. Así la duración siempre refleja el último
+# instante de actividad real, aunque el navegador se cierre sin logout.
+def registrar_actividad_visita(conexion, id_visita):
+
+    if not id_visita:
+        return
+
+    conexion.execute(
+        text("UPDATE visita SET fechaFin = UTC_TIMESTAMP() "
+             "WHERE idVisita = :id"),
+        {"id": id_visita}
+    )
+
+
+@ventas_bp.route("/keepalive", methods=["POST"])
+def keepalive():
+    """Latido del navegador: mantiene viva la sesión mientras la pestaña está abierta.
+
+    La renovación de la expiración la hace validar_sesion_activa(); aquí
+    solo se responde OK. Sin sesión devuelve 401 para que el front avise.
+    """
+    if "id_usuario" not in session:
+        return jsonify(ok=False, expiro=True), 401
+    return jsonify(ok=True)
+
+
 @ventas_bp.before_app_request
 def validar_sesion_activa():
 
@@ -336,6 +363,9 @@ def validar_sesion_activa():
                     text("DELETE FROM sesion_usuario WHERE idSesion = :id"),
                     {"id": sesion["idSesion"]}
                 )
+                registrar_actividad_visita(
+                    conexion, session.get("id_visita")
+                )
                 session.clear()
                 return None
 
@@ -349,6 +379,10 @@ def validar_sesion_activa():
                     WHERE idSesion = :id
                 """),
                 {"min": SESSION_TIMEOUT_MINUTES, "id": sesion["idSesion"]}
+            )
+
+            registrar_actividad_visita(
+                conexion, session.get("id_visita")
             )
 
     except Exception:
@@ -478,6 +512,7 @@ def login():
     respuesta = None
     id_usuario = None
     token = None
+    id_visita = None
 
     try:
         with engine.begin() as conexion:
@@ -597,6 +632,16 @@ def login():
                             "min": SESSION_TIMEOUT_MINUTES,
                         }
                     )
+
+                    nueva_visita = conexion.execute(
+                        text("""
+                            INSERT INTO visita (idUsuario, fechaInicio)
+                            VALUES (:u, UTC_TIMESTAMP())
+                        """),
+                        {"u": usuario["idUsuario"]},
+                    )
+                    id_visita = nueva_visita.lastrowid
+
                     eventos.append((
                         "login_exitoso",
                         f"Inicio de sesión de {correo}",
@@ -627,6 +672,7 @@ def login():
     session.permanent = True
     session["id_usuario"] = id_usuario
     session["token_sesion"] = token
+    session["id_visita"] = id_visita
 
     return redirect(url_for("principal"))
 
@@ -636,6 +682,7 @@ def logout():
 
     id_usuario = session.get("id_usuario")
     token = session.get("token_sesion")
+    id_visita = session.get("id_visita")
 
     try:
         if id_usuario is not None and token:
@@ -653,6 +700,8 @@ def logout():
                         "token": token
                     }
                 )
+
+                registrar_actividad_visita(conexion, id_visita)
 
     except Exception:
         current_app.logger.exception(

@@ -1,0 +1,28 @@
+Creando tablas nuevas...
+  = tabla restablecimiento_clave ya existe
+  = tabla auditoria ya existe
+  = tabla rol ya existe
+  = tabla permiso ya existe
+  = tabla usuario_rol ya existe
+  = tabla rol_permiso ya existe
+  = tabla archivo ya existe
+  = tabla visita ya existe
+Agregando columnas de bloqueo y expiración...
+Sembrando permisos...
+Sembrando roles base...
+Asignando rol Usuario a todos los usuarios existentes...
+  * usuario 1 marcado como Administrador
+Migración completada.
+ * Serving Flask app 'app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 125-335-282
+127.0.0.1 - - [02/Nov/2026 00:04:18] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [02/Nov/2026 00:04:18] "POST /registro HTTP/1.1" 200 -
+127.0.0.1 - - [02/Nov/2026 00:04:18] "POST /login HTTP/1.1" 302 -
+127.0.0.1 - - [02/Nov/2026 00:04:26] "GET /principal HTTP/1.1" 302 -
+127.0.0.1 - - [02/Nov/2026 00:04:54] "POST /logout HTTP/1.1" 302 -
