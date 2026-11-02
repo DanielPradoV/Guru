@@ -50,6 +50,12 @@
                 <button type="submit">Iniciar sesión</button>
             </form>
 
+
+            <form action="{{ url_for('ventas.reenviar_verificacion') }}" method="GET">
+                <button type="submit">Recuperar clave</button>
+            </form>
+
+
             <p class="registro">
                 ¿No tienes una cuenta?
                 <a href="{{ url_for('ventas.registro') }}">Regístrate aquí</a>
