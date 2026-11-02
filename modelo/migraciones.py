@@ -129,6 +129,14 @@ DDL = [
             INDEX idx_visita_inicio (fechaInicio)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     """),
+    ("configuracion_seguridad", """
+        CREATE TABLE IF NOT EXISTS configuracion_seguridad (
+            clave VARCHAR(50) PRIMARY KEY,
+            valor INT NOT NULL,
+            descripcion VARCHAR(150) NOT NULL,
+            fechaActualizacion DATETIME NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    """),
 ]
 
 PERMISOS = [
@@ -139,11 +147,29 @@ PERMISOS = [
     ("gestionar_usuarios", "Administrar usuarios y sus credenciales"),
     ("gestionar_roles", "Crear roles y asignar permisos"),
     ("ver_auditoria", "Consultar los registros de auditoría"),
+    ("gestionar_configuracion", "Ajustar los tiempos de expiración de sesión y de token"),
 ]
 
 ROLES_BASE = {"Usuario": ["ver_productos", "subir_archivos"]}
 ROL_ADMIN = "Administrador"
 ROL_USUARIO_SEMILLA = "Usuario"
+
+# Valores iniciales de los tiempos editables desde el panel. Solo se
+# insertan si la clave no existe, para no pisar lo que ya decidió el
+# administrador; la variable de entorno sigue siendo el respaldo cuando
+# la tabla está vacía.
+CONFIGURACION_BASE = [
+    (
+        "sesion_minutos",
+        int(os.getenv("SESSION_TIMEOUT_MINUTES", "30")),
+        "Minutos de inactividad antes de cerrar la sesión de la app",
+    ),
+    (
+        "token_minutos",
+        int(os.getenv("RESET_TOKEN_MINUTES", "30")),
+        "Minutos de validez de los enlaces de verificación y de restablecimiento",
+    ),
+]
 
 
 def ensure_esquema():
@@ -175,11 +201,15 @@ def ensure_esquema():
             print(f"  - {borrar_muertas.rowcount} sesiones muertas depuradas")
 
         print("Sembrando permisos...")
+        permisos_nuevos = []
         for codigo, descripcion in PERMISOS:
-            c.execute(
+            inserted = c.execute(
                 text("INSERT IGNORE INTO permiso (codigo, descripcion) VALUES (:codigo, :descripcion)"),
                 {"codigo": codigo, "descripcion": descripcion},
-            )
+            ).rowcount
+            if inserted:
+                permisos_nuevos.append(codigo)
+                print(f"  + permiso {codigo}")
 
         print("Sembrando roles base...")
         for nombre, codigos in ROLES_BASE.items():
@@ -214,6 +244,35 @@ def ensure_esquema():
                     text("INSERT INTO rol_permiso (idRol, idPermiso) SELECT :r, idPermiso FROM permiso"),
                     {"r": id_admin},
                 )
+
+        # Los permisos que esta migración acaba de estrenar se conceden al
+        # Administrador para que la pestaña nueva sea alcanzable desde ya;
+        # en relanzamientos siguientes ya no se re-escriben, así un permiso
+        # retirado a mano desde el panel de Roles sigue retirado.
+        if id_admin is not None and permisos_nuevos:
+            for codigo in permisos_nuevos:
+                c.execute(
+                    text("""
+                        INSERT IGNORE INTO rol_permiso (idRol, idPermiso)
+                        SELECT :r, idPermiso FROM permiso WHERE codigo = :c
+                    """),
+                    {"r": id_admin, "c": codigo},
+                )
+
+        print("Sembrando configuración de seguridad...")
+        for clave, valor, descripcion in CONFIGURACION_BASE:
+            resultado = c.execute(
+                text("""
+                    INSERT IGNORE INTO configuracion_seguridad
+                        (clave, valor, descripcion, fechaActualizacion)
+                    VALUES (:clave, :valor, :descripcion, NULL)
+                """),
+                {"clave": clave, "valor": valor, "descripcion": descripcion},
+            )
+            if resultado.rowcount:
+                print(f"  + {clave} = {valor} min")
+            else:
+                print(f"  = {clave} conserva su valor")
 
         print("Asignando rol Usuario a todos los usuarios existentes...")
         id_usuario_rol = c.execute(

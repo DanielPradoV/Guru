@@ -8,7 +8,7 @@ from controlador.ventas_controlador import ventas_bp
 from controlador.admin_controlador import admin_bp
 from controlador.cuenta_controlador import cuenta_bp
 from controlador.seguridad import (
-    SESSION_TIMEOUT_MINUTES,
+    minutos_sesion,
     obtener_permisos,
     sesion_timeout,
 )
@@ -31,7 +31,8 @@ if not app.secret_key:
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Cookie de sesión con expiración configurable y ventana deslizante:
-# se renueva en cada petición activa hasta SESSION_TIMEOUT_MINUTES.
+# se renueva en cada petición activa hasta el valor que defina el
+# administrador en /admin/configuracion.
 app.permanent_session_lifetime = sesion_timeout()
 
 # Límite de tamaño para la subida de archivos (punto 15).
@@ -85,7 +86,7 @@ def principal():
     return render_template(
         "principal.html",
         permisos=permisos,
-        session_timeout_minutes=SESSION_TIMEOUT_MINUTES,
+        session_timeout_minutes=minutos_sesion(),
     )
 
 @app.route("/productos")

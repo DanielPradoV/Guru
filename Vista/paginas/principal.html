@@ -47,6 +47,9 @@
                         <li><a href="{{ url_for('admin.auditoria') }}">Auditoría</a></li>
                         <li><a href="{{ url_for('admin.estadisticas') }}">Estadísticas</a></li>
                     {% endif %}
+                    {% if 'gestionar_configuracion' in permisos %}
+                        <li><a href="{{ url_for('admin.configuracion') }}">Configuración</a></li>
+                    {% endif %}
                     <li>
                         <form action="{{ url_for('ventas.logout') }}"
                               method="POST">

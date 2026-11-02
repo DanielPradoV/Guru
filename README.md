@@ -21,9 +21,8 @@ despliegue en Render no dispone de shell para correr migraciones a mano.
 | --- | --- | --- |
 | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | conexión a MariaDB/MySQL | localhost / guru |
 | `SECRET_KEY` | firma de la cookie de sesión | — |
-| `SESSION_TIMEOUT_MINUTES` | inactividad antes de cerrar la sesión | 30 |
-| `RESET_TOKEN_MINUTES` | validez del token de "Olvidé mi contraseña" | 30 |
-| `VERIFICACION_TOKEN_MINUTES` | validez del token de verificación de correo | 30 |
+| `SESSION_TIMEOUT_MINUTES` | respaldo del tiempo de inactividad de la sesión (luego manda la BD) | 30 |
+| `RESET_TOKEN_MINUTES` | respaldo de la validez de los tokens de autenticación | 30 |
 | `LOCK_MAX_INTENTOS`, `LOCK_MINUTES` | bloqueo de cuenta tras intentos fallidos | 5 / 15 |
 | `MAX_UPLOAD_BYTES` | tamaño máximo de archivo subido | 5 MB |
 | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `APP_BASE_URL` | envío de correos | — |
@@ -49,6 +48,23 @@ Si el correo ya existe, el script restablece su contraseña y le asigna el
 rol `Administrador`. Alternativa sin terminal: registrar el correo desde
 `/registro` y luego promoverlo desde **Panel → Usuarios** marcando la
 casilla del rol.
+
+## Tiempos de expiración editables
+
+`/admin/configuracion` (permiso `gestionar_configuracion`) deja ajustar sin
+redeployar los dos tiempos que se evalúan en los puntos 10 y 11 del
+checklist. Se guardan en la tabla `configuracion_seguridad` y la aplicación
+los lee en cada uso, así que el cambio toma efecto en la misma petición:
+
+- `sesion_minutos` — inactividad antes de cerrar la sesión de la app. Al
+  guardarlo, las sesiones vivas pasan a la ventana nueva.
+- `token_minutos` — validez de los enlaces de verificación de correo y de
+  restablecimiento de contraseña. Al **reducirlo**, los enlaces ya emitidos
+  se recortan a la ventana nueva.
+
+Los valores de entorno son solo el respaldo mientras la tabla no exista.
+Cada guardado se registra en auditoría con la acción
+`cambio_configuracion`.
 
 ## Métricas de uso
 

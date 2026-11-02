@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru | Configuración</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Guru</h1>
+        <nav>
+            <a href="{{ url_for('principal') }}">Mi cuenta</a>
+            <a href="{{ url_for('admin.usuarios') }}">Usuarios</a>
+            <a href="{{ url_for('admin.roles') }}">Roles</a>
+            <a href="{{ url_for('admin.auditoria') }}">Auditoría</a>
+            <a href="{{ url_for('admin.estadisticas') }}">Estadísticas</a>
+            <a href="{{ url_for('admin.configuracion') }}">Configuración</a>
+        </nav>
+    </header>
+    <main>
+        <section class="panel">
+            <h1>Configuración de expiraciones</h1>
+            <p class="subtitulo">
+                Los tiempos se guardan en la base de datos y aplican de
+                inmediato, sin volver a desplegar.
+            </p>
+
+            {% if mensaje %}
+                <p role="status"
+                   class="{{ 'mensaje-error' if tipo_mensaje == 'error' else 'mensaje-exito' }}">
+                    {{ mensaje }}
+                </p>
+            {% endif %}
+
+            <form method="POST"
+                  action="{{ url_for('admin.configuracion') }}"
+                  class="formulario-config">
+
+                {% for clave, reglas in configuracion.items() %}
+                    <fieldset class="campo-config">
+                        <legend>{{ reglas.etiqueta }}</legend>
+
+                        <p class="ayuda">{{ reglas.ayuda }}</p>
+
+                        <p class="valor-actual">
+                            Valor en uso:
+                            <strong>{{ valores[clave] }} min</strong>
+                        </p>
+
+                        <label class="linea-minutos">
+                            <input type="number"
+                                   id="{{ clave }}"
+                                   name="{{ clave }}"
+                                   value="{{ valores[clave] }}"
+                                   min="{{ reglas.minimo }}"
+                                   max="{{ reglas.maximo }}"
+                                   step="1"
+                                   required>
+                            <span>minutos permitidos:
+                                {{ reglas.minimo }}–{{ reglas.maximo }}</span>
+                        </label>
+                    </fieldset>
+                {% endfor %}
+
+                <button type="submit">Guardar cambios</button>
+            </form>
+
+            <section class="notas-config">
+                <h2>Cómo verificar cada punto</h2>
+                <ul>
+                    <li>
+                        <strong>Expiración de sesión.</strong> Auméntala para
+                        que la sesión sobreviva varios minutos sin tocar nada,
+                        o redúcela a 1 minuto y deja la pestaña inactiva: al
+                        volver, la app rechaza la sesión por inactividad.
+                    </li>
+                    <li>
+                        <strong>Expiración del token.</strong> Bájala a 1
+                        minuto y pide un enlace de verificación o de
+                        restablecimiento; al minuto, el mismo enlace responde
+                        que venció. Los enlaces ya emitidos se recortan a la
+                        ventana nueva al guardar.
+                    </li>
+                    <li>
+                        Cada cambio queda registrado en
+                        <a href="{{ url_for('admin.auditoria') }}">Auditoría</a>
+                        con la acción <code>cambio_configuracion</code>.
+                    </li>
+                </ul>
+            </section>
+        </section>
+    </main>
+</body>
+</html>

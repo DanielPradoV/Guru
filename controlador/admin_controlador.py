@@ -17,9 +17,13 @@ from werkzeug.security import generate_password_hash
 from modelo.conexion import engine
 
 from controlador.seguridad import (
+    CONFIGURACION,
+    configuracion_seguridad,
+    establecer_configuracion,
     obtener_permisos,
     registrar_accion,
     requiere_permiso,
+    sesion_timeout,
 )
 
 admin_bp = Blueprint("admin", __name__)
@@ -461,3 +465,124 @@ def estadisticas():
         recientes=recientes,
         dias=DIAS_ESTADISTICAS,
     )
+
+
+# -----------------------------------------------------------------
+# Configuración de expiraciones (puntos 10 y 11)
+# -----------------------------------------------------------------
+
+@admin_bp.route("/admin/configuracion", methods=["GET", "POST"])
+@requiere_permiso("gestionar_configuracion")
+def configuracion():
+
+    actuales = configuracion_seguridad()
+    mensaje = None
+    tipo_mensaje = "error"
+
+    if request.method == "POST":
+        nuevos, mensaje, tipo_mensaje = _leer_configuracion_form()
+
+        if nuevos:
+            try:
+                for clave, valor in nuevos.items():
+                    establecer_configuracion(clave, valor)
+
+                with engine.begin() as conexion:
+
+                    # Las sesiones vivas pasan a la nueva ventana: si se
+                    # acorta, ninguna puede quedarse con el tiempo viejo.
+                    if nuevos["sesion_minutos"] != actuales["sesion_minutos"]:
+                        conexion.execute(
+                            text("""
+                                UPDATE sesion_usuario
+                                SET fechaExpiracion = DATE_ADD(
+                                        UTC_TIMESTAMP(),
+                                        INTERVAL :min MINUTE),
+                                    fechaUltimaActividad = UTC_TIMESTAMP()
+                                WHERE fechaExpiracion > UTC_TIMESTAMP()
+                            """),
+                            {"min": nuevos["sesion_minutos"]},
+                        )
+
+                    # Al reducir la validez del token, los enlaces ya
+                    # emitidos se recortan a la ventana nueva.
+                    if nuevos["token_minutos"] < actuales["token_minutos"]:
+                        for tabla in ("restablecimiento_clave",
+                                      "verificacion_correo"):
+                            conexion.execute(
+                                text(f"""
+                                    UPDATE {tabla}
+                                    SET fechaExpiracion = LEAST(
+                                        fechaExpiracion,
+                                        DATE_ADD(UTC_TIMESTAMP(),
+                                                 INTERVAL :min MINUTE))
+                                    WHERE usado = FALSE
+                                      AND fechaExpiracion > UTC_TIMESTAMP()
+                                """),
+                                {"min": nuevos["token_minutos"]},
+                            )
+
+                # La cookie de esta misma petición ya nace con el nuevo
+                # tiempo de vida.
+                current_app.permanent_session_lifetime = sesion_timeout()
+
+                diferencia = [
+                    f"{CONFIGURACION[clave]['etiqueta']}: "
+                    f"{actuales[clave]} → {valor} min"
+                    for clave, valor in nuevos.items()
+                    if valor != actuales[clave]
+                ]
+                registrar_accion(
+                    "cambio_configuracion",
+                    "; ".join(diferencia) or "sin cambios"
+                )
+                mensaje = (
+                    f"Configuración guardada ({'; '.join(diferencia)})."
+                    if diferencia else "Configuración guardada."
+                )
+                tipo_mensaje = "exito"
+            except Exception:
+                current_app.logger.exception(
+                    "Error al guardar la configuración de seguridad"
+                )
+                mensaje = "No se pudo guardar la configuración."
+                tipo_mensaje = "error"
+
+        actuales = configuracion_seguridad()
+
+    return render_template(
+        "configuracion.html",
+        valores=actuales,
+        configuracion=CONFIGURACION,
+        mensaje=mensaje,
+        tipo_mensaje=tipo_mensaje,
+    )
+
+
+def _leer_configuracion_form():
+    """Valida el formulario y devuelve (valores, mensaje, tipo)."""
+
+    nuevos = {}
+
+    for clave, reglas in CONFIGURACION.items():
+        crudo = request.form.get(clave, "").strip()
+
+        if not crudo.isdigit():
+            return (
+                None,
+                f"{reglas['etiqueta']}: escribe los minutos en número.",
+                "error",
+            )
+
+        valor = int(crudo)
+        if not reglas["minimo"] <= valor <= reglas["maximo"]:
+            return (
+                None,
+                f"{reglas['etiqueta']}: usa entre {reglas['minimo']} y "
+                f"{reglas['maximo']} minutos.",
+                "error",
+            )
+
+        nuevos[clave] = valor
+
+    return nuevos, None, "error"

@@ -26,7 +26,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from modelo.conexion import engine
 
 from controlador.seguridad import (
-    RESET_TOKEN_MINUTES,
+    minutos_token,
     registrar_accion,
 )
 
@@ -75,7 +75,7 @@ def enviar_correo_restablecimiento(correo, nombre, token):
             <p>Recibimos una solicitud para restablecer tu contraseña
             en Guru.</p>
             <a href="{enlace}">Restablecer mi contraseña</a>
-            <p>Este enlace vence en {RESET_TOKEN_MINUTES} minutos y
+            <p>Este enlace vence en {minutos_token()} minutos y
             solo puede usarse una vez.</p>
             <p>Si no solicitaste el cambio, ignora este mensaje; tu
             contraseña actual seguirá siendo válida.</p>
@@ -141,7 +141,7 @@ def recuperar_contrasena():
                             {
                                 "id_usuario": usuario["idUsuario"],
                                 "token_hash": token_hash,
-                                "minutos": RESET_TOKEN_MINUTES,
+                                "minutos": minutos_token(),
                             }
                         )
 

@@ -34,11 +34,9 @@ from modelo.conexion import engine
 from controlador.seguridad import (
     LOCK_MAX_INTENTOS,
     LOCK_MINUTES,
-    RESET_TOKEN_MINUTES,
-    SESSION_TIMEOUT_MINUTES,
-    VERIFICACION_TOKEN_MINUTES,
+    minutos_sesion,
+    minutos_token,
     registrar_accion,
-    sesion_timeout,
 )
 
 
@@ -86,7 +84,7 @@ def enviar_correo_verificacion(correo, nombre, token):
                 Verificar mi correo
             </a>
 
-            <p>Este enlace vence en {VERIFICACION_TOKEN_MINUTES} minutos.</p>
+            <p>Este enlace vence en {minutos_token()} minutos.</p>
 
             <p>Si no creaste esta cuenta, ignora este mensaje.</p>
         """
@@ -241,7 +239,7 @@ def reenviar_verificacion():
                             {
                                 "id_usuario": usuario["idUsuario"],
                                 "token_hash": token_hash,
-                                "minutos": VERIFICACION_TOKEN_MINUTES,
+                                "minutos": minutos_token(),
                             }
                         )
 
@@ -378,7 +376,7 @@ def validar_sesion_activa():
                         fechaUltimaActividad = UTC_TIMESTAMP()
                     WHERE idSesion = :id
                 """),
-                {"min": SESSION_TIMEOUT_MINUTES, "id": sesion["idSesion"]}
+                {"min": minutos_sesion(), "id": sesion["idSesion"]}
             )
 
             registrar_actividad_visita(
@@ -642,7 +640,7 @@ def login():
                         {
                             "id_usuario": usuario["idUsuario"],
                             "token": nuevo_token,
-                            "min": SESSION_TIMEOUT_MINUTES,
+                            "min": minutos_sesion(),
                         }
                     )
 
