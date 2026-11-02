@@ -8,12 +8,6 @@
           href="{{ url_for('static', filename='css/Styles.css') }}">
 </head>
 <body>
-    <header>
-        <h1>Guru</h1>
-        <nav>
-            <a href="{{ url_for('inicio') }}">Inicio</a>
-        </nav>
-    </header>
     <main class="login-container">
         <section class="login-card">
             <p class="{{ 'mensaje-error' if tipo_mensaje == 'error' else 'mensaje-exito' }}">

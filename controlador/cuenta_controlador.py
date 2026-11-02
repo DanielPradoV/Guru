@@ -145,10 +145,14 @@ def recuperar_contrasena():
                             }
                         )
 
-                        enviar_correo_restablecimiento(
+                        resultado = enviar_correo_restablecimiento(
                             usuario["Correo"],
                             usuario["NombreCompleto"],
                             token
+                        )
+                        current_app.logger.info(
+                            "Resend (restablecimiento) respondió: %r",
+                            resultado
                         )
 
                         usuario_id = usuario["idUsuario"]
