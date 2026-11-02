@@ -166,7 +166,8 @@ def verificar_correo(token):
 # Reenviar correo de verificación
 @ventas_bp.route("/reenviar-verificacion", methods=["GET", "POST"])
 def reenviar_verificacion():
-
+    
+    print("========== ESTOY EJECUTANDO REENVIAR_VERIFICACION ==========", flush=True)
     mensaje = None
     tipo_mensaje = "error"
 
