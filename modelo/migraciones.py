@@ -8,7 +8,11 @@ datos.
 Se aplica automáticamente al arrancar la aplicación y también puede
 ejecutarse a mano:  python -m modelo.migraciones
 """
+import os
+
 from sqlalchemy import text
+from werkzeug.security import generate_password_hash
+
 from modelo.conexion import engine
 
 
@@ -139,6 +143,7 @@ PERMISOS = [
 
 ROLES_BASE = {"Usuario": ["ver_productos", "subir_archivos"]}
 ROL_ADMIN = "Administrador"
+ROL_USUARIO_SEMILLA = "Usuario"
 
 
 def ensure_esquema():
@@ -224,6 +229,75 @@ def ensure_esquema():
             print(f"  * usuario {primer_usuario} marcado como Administrador")
 
     print("Migración completada.")
+    asegurar_administrador()
+
+
+def asegurar_administrador():
+    """Crea el administrador definido por ADMIN_EMAIL / ADMIN_PASSWORD.
+
+    Render no da shell para correr scripts, así que el administrador se
+    siembra al arrancar desde las variables de entorno. Si el correo ya
+    existe solo se le asegura el rol Administrador; la contraseña nunca se
+    reescribe, para no deshacer un cambio hecho desde el panel.
+    """
+    correo = os.getenv("ADMIN_EMAIL", "").strip().lower()
+    clave = os.getenv("ADMIN_PASSWORD", "")
+
+    if not correo or not clave:
+        return
+
+    if len(clave) < 8:
+        print("  ! ADMIN_PASSWORD es demasiado corta (mínimo 8); se omite")
+        return
+
+    with engine.begin() as c:
+        existente = c.execute(
+            text("SELECT idUsuario FROM usuario WHERE Correo = :c"),
+            {"c": correo},
+        ).scalar()
+
+        if existente:
+            id_usuario = existente
+            creado = False
+        else:
+            usuario = (os.getenv("ADMIN_USUARIO") or correo.split("@")[0])[:50]
+            nombre = (os.getenv("ADMIN_NOMBRE") or "Administrador")[:100]
+            resultado = c.execute(
+                text("""
+                    INSERT INTO usuario
+                        (NombreCompleto, Correo, Usuario, Clave,
+                         CorreoVerificado)
+                    VALUES (:nombre, :correo, :usuario, :clave, TRUE)
+                """),
+                {
+                    "nombre": nombre,
+                    "correo": correo,
+                    "usuario": usuario,
+                    "clave": generate_password_hash(clave),
+                },
+            )
+            id_usuario = resultado.lastrowid
+            creado = True
+
+        for nombre_rol in (ROL_USUARIO_SEMILLA, ROL_ADMIN):
+            id_rol = c.execute(
+                text("SELECT idRol FROM rol WHERE nombreRol = :n"),
+                {"n": nombre_rol},
+            ).scalar()
+            if id_rol:
+                c.execute(
+                    text("""
+                        INSERT IGNORE INTO usuario_rol (idUsuario, idRol)
+                        VALUES (:u, :r)
+                    """),
+                    {"u": id_usuario, "r": id_rol},
+                )
+
+        print(
+            f"  {'*' if creado else '='} administrador "
+            f"{'creado' if creado else 'ya existía'}: {correo} "
+            f"(id {id_usuario})"
+        )
 
 
 if __name__ == "__main__":

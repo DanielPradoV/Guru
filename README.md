@@ -27,10 +27,18 @@ despliegue en Render no dispone de shell para correr migraciones a mano.
 | `LOCK_MAX_INTENTOS`, `LOCK_MINUTES` | bloqueo de cuenta tras intentos fallidos | 5 / 15 |
 | `MAX_UPLOAD_BYTES` | tamaño máximo de archivo subido | 5 MB |
 | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `APP_BASE_URL` | envío de correos | — |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | administrador que se siembra al arrancar | desactivado |
+| `ADMIN_USUARIO`, `ADMIN_NOMBRE` | datos opcionales de ese administrador | derivados del correo |
 
 ## Usuario administrador
 
-Se crea o se promueve desde la línea de comandos:
+En **Render** (sin shell) define en *Environment* `ADMIN_EMAIL` y
+`ADMIN_PASSWORD` y hace un redeploy: al arrancar, la aplicación crea ese
+usuario con el rol `Administrador` si no existe. Si el correo ya estaba
+registrado, solo se le asegura el rol y **nunca** se le cambia la
+contraseña, para no deshacer un cambio hecho desde el panel.
+
+Desde la línea de comandos, en cualquier entorno:
 
 ```bash
 python scripts/crear_admin.py admin@guru.com "ClaveSegura12" admin "Administrador Guru"
@@ -38,9 +46,9 @@ python scripts/crear_admin.py --promover danielverano016@gmail.com   # rol Admin
 ```
 
 Si el correo ya existe, el script restablece su contraseña y le asigna el
-rol `Administrador`. En Render hay que ejecutar el mismo comando desde el
-Root Shell del servicio, o registrar el correo desde `/registro` y luego
-promoverlo desde **Panel → Usuarios** marcando la casilla del rol.
+rol `Administrador`. Alternativa sin terminal: registrar el correo desde
+`/registro` y luego promoverlo desde **Panel → Usuarios** marcando la
+casilla del rol.
 
 ## Métricas de uso
 
