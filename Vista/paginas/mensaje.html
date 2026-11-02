@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru | Aviso</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Guru</h1>
+        <nav>
+            <a href="{{ url_for('inicio') }}">Inicio</a>
+        </nav>
+    </header>
+    <main class="login-container">
+        <section class="login-card">
+            <p class="{{ 'mensaje-error' if tipo_mensaje == 'error' else 'mensaje-exito' }}">
+                {{ mensaje }}
+            </p>
+        </section>
+    </main>
+</body>
+</html>

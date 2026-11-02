@@ -122,3 +122,114 @@ main {
     color: #64748b;
     font-size: 12px;
 }
+/* --- Nuevas vistas: paneles, mensajes y tablas --- */
+.mensaje-error {
+    color: #b91c1c;
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.mensaje-exito {
+    color: #15803d;
+    background: #dcfce7;
+    border: 1px solid #86efac;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.panel {
+    max-width: 960px;
+    margin: 32px auto;
+    padding: 24px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, .08);
+}
+
+.panel h1 {
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+
+.tarjeta-usuario {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 14px 0;
+}
+
+.tarjeta-usuario h2 {
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.tarjeta-usuario h3 {
+    font-size: 14px;
+    margin: 12px 0 6px;
+}
+
+.panel label {
+    display: inline-block;
+    margin-right: 14px;
+    font-size: 14px;
+}
+
+.panel .permiso {
+    display: block;
+    margin: 4px 0;
+}
+
+.panel button {
+    display: block;
+    margin-top: 10px;
+}
+
+.crear-rol {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.crear-rol input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+}
+
+.lista {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.lista th, .lista td {
+    border: 1px solid #e2e8f0;
+    padding: 6px 8px;
+    text-align: left;
+}
+
+.lista th {
+    background: #f1f5f9;
+}
+
+.badge-error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 6px;
+    font-size: 11px;
+    padding: 2px 6px;
+}
+
+.badge-aviso {
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 6px;
+    font-size: 11px;
+    padding: 2px 6px;
+}

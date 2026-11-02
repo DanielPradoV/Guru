@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru | Recuperar contraseña</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Guru</h1>
+        <nav>
+            <a href="{{ url_for('inicio') }}">Inicio</a>
+        </nav>
+    </header>
+    <main class="login-container">
+        <section class="login-card">
+            <h1>¿Olvidaste tu contraseña?</h1>
+            <p class="subtitulo">
+                Te enviaremos un enlace para restablecerla.
+            </p>
+            {% if mensaje %}
+                <p role="status"
+                   class="{{ 'mensaje-error' if tipo_mensaje == 'error' else 'mensaje-exito' }}">
+                    {{ mensaje }}
+                </p>
+            {% endif %}
+            <form method="POST">
+                <label for="correo">Correo electrónico</label>
+                <input
+                    type="email"
+                    id="correo"
+                    name="correo"
+                    placeholder="usuario@ejemplo.com"
+                    autocomplete="email"
+                    required
+                >
+                <button type="submit">Enviar enlace</button>
+            </form>
+            <p class="registro">
+                <a href="{{ url_for('ventas.reenviar_verificacion') }}">
+                    Reenviar verificación de correo
+                </a>
+            </p>
+        </section>
+    </main>
+</body>
+</html>

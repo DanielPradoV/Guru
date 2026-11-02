@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru | Nueva contraseña</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Guru</h1>
+        <nav>
+            <a href="{{ url_for('inicio') }}">Inicio</a>
+        </nav>
+    </header>
+    <main class="login-container">
+        <section class="login-card">
+            <h1>Establecer nueva contraseña</h1>
+            {% if mensaje %}
+                <p role="status"
+                   class="{{ 'mensaje-error' if tipo_mensaje == 'error' else 'mensaje-exito' }}">
+                    {{ mensaje }}
+                </p>
+            {% endif %}
+            <form method="POST">
+                <label for="contrasena">Nueva contraseña</label>
+                <input
+                    type="password"
+                    id="contrasena"
+                    name="contrasena"
+                    placeholder="Mínimo 8 caracteres"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+                <label for="confirmar">Confirmar contraseña</label>
+                <input
+                    type="password"
+                    id="confirmar"
+                    name="confirmar"
+                    placeholder="Repite la contraseña"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+                <button type="submit">Cambiar contraseña</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

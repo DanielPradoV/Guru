@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru | Administrar usuarios</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Guru</h1>
+        <nav>
+            <a href="{{ url_for('principal') }}">Mi cuenta</a>
+            <a href="{{ url_for('admin.usuarios') }}">Usuarios</a>
+            <a href="{{ url_for('admin.roles') }}">Roles</a>
+            <a href="{{ url_for('admin.auditoria') }}">Auditoría</a>
+        </nav>
+    </header>
+    <main>
+        <section class="panel">
+            <h1>Usuarios registrados</h1>
+
+            {% if request.args.get('aviso') %}
+                <p role="status"
+                   class="{{ 'mensaje-error' if request.args.get('tipo_aviso') == 'error' else 'mensaje-exito' }}">
+                    {{ request.args.get('aviso') }}
+                </p>
+            {% endif %}
+
+            {% for u in usuarios %}
+                <article class="tarjeta-usuario">
+                    <h2>
+                        {{ u.Usuario }} — {{ u.NombreCompleto }}
+                        {% if u.bloqueado %}
+                            <span class="badge-error">bloqueada</span>
+                        {% endif %}
+                        {% if not u.CorreoVerificado %}
+                            <span class="badge-aviso">correo sin verificar</span>
+                        {% endif %}
+                    </h2>
+                    <p>{{ u.Correo }}</p>
+
+                    <form method="POST"
+                          action="{{ url_for('admin.asignar_roles', id_usuario=u.idUsuario) }}">
+                        <h3>Roles del usuario</h3>
+                        {% for r in roles %}
+                            <label>
+                                <input type="checkbox" name="roles"
+                                       value="{{ r.idRol }}"
+                                       {% if r.idRol in roles_usuario.get(u.idUsuario, []) %}
+                                           checked
+                                       {% endif %}>
+                                {{ r.nombreRol }}
+                            </label>
+                        {% endfor %}
+                        <button type="submit">Guardar roles</button>
+                    </form>
+
+                    <form method="POST"
+                          action="{{ url_for('admin.cambiar_clave', id_usuario=u.idUsuario) }}">
+                        <h3>Cambiar contraseña (mín. 8 caracteres)</h3>
+                        <input type="password" name="clave_nueva"
+                               placeholder="Nueva contraseña"
+                               minlength="8" required>
+                        <button type="submit">Cambiar clave</button>
+                    </form>
+                </article>
+            {% endfor %}
+        </section>
+    </main>
+</body>
+</html>

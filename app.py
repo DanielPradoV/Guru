@@ -1,6 +1,16 @@
+import logging
 import os
+from logging.handlers import RotatingFileHandler
+
 from flask import Flask, render_template, session, redirect, url_for
 from controlador.ventas_controlador import ventas_bp
+from controlador.admin_controlador import admin_bp
+from controlador.cuenta_controlador import cuenta_bp
+from controlador.seguridad import (
+    SESSION_TIMEOUT_MINUTES,
+    obtener_permisos,
+    sesion_timeout,
+)
 
 app = Flask(
     __name__,
@@ -15,8 +25,35 @@ if not app.secret_key:
         "Falta configurar la variable de entorno SECRET_KEY."
     )
 
+# Cookie de sesión con expiración configurable y ventana deslizante:
+# se renueva en cada petición activa hasta SESSION_TIMEOUT_MINUTES.
+app.permanent_session_lifetime = sesion_timeout()
+
+# Límite de tamaño para la subida de archivos (punto 15).
+app.config["MAX_CONTENT_LENGTH"] = int(
+    os.getenv("MAX_UPLOAD_BYTES", 5 * 1024 * 1024)
+)
+
+# Logs de la aplicación también a archivo para poder auditar fallos
+# (los registros de auditoría de negocio viven en la tabla auditoria).
+_log_dir = os.path.join(app.root_path, "logs")
+os.makedirs(_log_dir, exist_ok=True)
+_handler = RotatingFileHandler(
+    os.path.join(_log_dir, "aplicacion.log"),
+    maxBytes=1_000_000,
+    backupCount=5,
+    encoding="utf-8",
+)
+_handler.setFormatter(logging.Formatter(
+    "%(asctime)s %(levelname)s en %(name)s: %(message)s [en %(pathname)s:%(lineno)d]"
+))
+_handler.setLevel(logging.INFO)
+app.logger.addHandler(_handler)
+app.logger.setLevel(logging.INFO)
 
 app.register_blueprint(ventas_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(cuenta_bp)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -28,7 +65,13 @@ def principal():
     if "id_usuario" not in session:
         return redirect(url_for("inicio"))
 
-    return render_template("principal.html")
+    permisos = obtener_permisos(session["id_usuario"])
+
+    return render_template(
+        "principal.html",
+        permisos=permisos,
+        session_timeout_minutes=SESSION_TIMEOUT_MINUTES,
+    )
 
 @app.route("/productos")
 def productos():
@@ -43,6 +86,15 @@ def carrito():
 @app.route("/nosotros")
 def nosotros():
     return render_template("nosotros.html")
+
+
+@app.errorhandler(413)
+def archivo_demasiado_grande(error):
+    return render_template(
+        "mensaje.html",
+        mensaje="El archivo supera el tamaño máximo permitido (5 MB).",
+        tipo_mensaje="error",
+    ), 413
 
 
 if __name__ == "__main__":

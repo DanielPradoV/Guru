@@ -16,6 +16,17 @@
             <a href="{{ url_for('productos') }}">Productos</a>
             <a href="{{ url_for('carrito') }}">Carrito</a>
             <a href="{{ url_for('nosotros') }}">Nosotros</a>
+            <a href="{{ url_for('cuenta.perfil') }}">Perfil</a>
+            <a href="{{ url_for('cuenta.subidas') }}">Mis archivos</a>
+            {% if 'gestionar_usuarios' in permisos %}
+                <a href="{{ url_for('admin.usuarios') }}">Usuarios</a>
+            {% endif %}
+            {% if 'gestionar_roles' in permisos %}
+                <a href="{{ url_for('admin.roles') }}">Roles</a>
+            {% endif %}
+            {% if 'ver_auditoria' in permisos %}
+                <a href="{{ url_for('admin.auditoria') }}">Auditoría</a>
+            {% endif %}
         </nav>
     </header>
 
@@ -23,6 +34,10 @@
         <section class="login-card">
             <h1>¡Bienvenido a Guru!</h1>
             <p>Has iniciado sesión correctamente.</p>
+            <p class="subtitulo">
+                Tu sesión vence tras
+                {{ session_timeout_minutes }} minutos de inactividad.
+            </p>
 
             <form action="{{ url_for('ventas.logout') }}" method="POST">
                 <button type="submit">Cerrar sesión</button>

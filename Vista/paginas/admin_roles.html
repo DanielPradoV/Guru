@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru | Roles y permisos</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Guru</h1>
+        <nav>
+            <a href="{{ url_for('principal') }}">Mi cuenta</a>
+            <a href="{{ url_for('admin.usuarios') }}">Usuarios</a>
+            <a href="{{ url_for('admin.roles') }}">Roles</a>
+            <a href="{{ url_for('admin.auditoria') }}">Auditoría</a>
+        </nav>
+    </header>
+    <main>
+        <section class="panel">
+            <h1>Roles y permisos</h1>
+
+            {% if mensaje %}
+                <p role="status"
+                   class="{{ 'mensaje-error' if tipo_mensaje == 'error' else 'mensaje-exito' }}">
+                    {{ mensaje }}
+                </p>
+            {% endif %}
+
+            <form method="POST" class="crear-rol">
+                <label for="nombreRol">Nuevo rol</label>
+                <input type="text" id="nombreRol" name="nombreRol"
+                       maxlength="50" placeholder="p. ej. Vendedor" required>
+                <button type="submit">Crear rol</button>
+            </form>
+
+            {% for r in roles %}
+                <article class="tarjeta-usuario">
+                    <h2>{{ r.nombreRol }}</h2>
+                    <form method="POST"
+                          action="{{ url_for('admin.editar_permisos', id_rol=r.idRol) }}">
+                        <h3>Permisos del rol</h3>
+                        {% for p in permisos %}
+                            <label class="permiso">
+                                <input type="checkbox" name="permisos"
+                                       value="{{ p.idPermiso }}"
+                                       {% if p.idPermiso in permisos_rol.get(r.idRol, []) %}
+                                           checked
+                                       {% endif %}>
+                                <strong>{{ p.codigo }}</strong>
+                                <small>{{ p.descripcion }}</small>
+                            </label>
+                        {% endfor %}
+                        <button type="submit">Guardar permisos</button>
+                    </form>
+                </article>
+            {% endfor %}
+        </section>
+    </main>
+</body>
+</html>

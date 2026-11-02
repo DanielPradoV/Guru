@@ -1,0 +1,363 @@
+2026-11-01 22:45:46,749 ERROR en app: No se pudo registrar la acción de auditoría [en C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\seguridad.py:41]
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 810, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\err.py", line 154, in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+pymysql.err.OperationalError: (1205, 'Lock wait timeout exceeded; try restarting transaction')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\seguridad.py", line 28, in registrar_accion
+    conexion.execute(
+    ~~~~~~~~~~~~~~~~^
+        text("""
+        ^^^^^^^^
+    ...<8 lines>...
+        }
+        ^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1463, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 533, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1683, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<9 lines>...
+        param_dict=param_dict,
+    )
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1837, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1977, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2347, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 810, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\err.py", line 154, in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1205, 'Lock wait timeout exceeded; try restarting transaction')
+[SQL: 
+                    INSERT INTO auditoria (idUsuario, accion, detalle, direccionIp)
+                    VALUES (%(usuario)s, %(accion)s, %(detalle)s, %(ip)s)
+                ]
+[parameters: {'usuario': 8, 'accion': 'login_fallido', 'detalle': 'Contraseña incorrecto (1/5)', 'ip': '127.0.0.1'}]
+(Background on this error at: https://sqlalche.me/e/21/e3q8)
+2026-11-01 22:46:38,202 ERROR en app: No se pudo registrar la acción de auditoría [en C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\seguridad.py:41]
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 810, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\err.py", line 154, in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+pymysql.err.OperationalError: (1205, 'Lock wait timeout exceeded; try restarting transaction')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\seguridad.py", line 28, in registrar_accion
+    conexion.execute(
+    ~~~~~~~~~~~~~~~~^
+        text("""
+        ^^^^^^^^
+    ...<8 lines>...
+        }
+        ^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1463, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 533, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1683, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<9 lines>...
+        param_dict=param_dict,
+    )
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1837, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1977, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2347, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 810, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\err.py", line 154, in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1205, 'Lock wait timeout exceeded; try restarting transaction')
+[SQL: 
+                    INSERT INTO auditoria (idUsuario, accion, detalle, direccionIp)
+                    VALUES (%(usuario)s, %(accion)s, %(detalle)s, %(ip)s)
+                ]
+[parameters: {'usuario': 8, 'accion': 'login_fallido', 'detalle': 'Contraseña incorrecto (2/5)', 'ip': '127.0.0.1'}]
+(Background on this error at: https://sqlalche.me/e/21/e3q8)
+2026-11-01 22:47:29,617 ERROR en app: No se pudo registrar la acción de auditoría [en C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\seguridad.py:41]
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 810, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\err.py", line 154, in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+pymysql.err.OperationalError: (1205, 'Lock wait timeout exceeded; try restarting transaction')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\seguridad.py", line 28, in registrar_accion
+    conexion.execute(
+    ~~~~~~~~~~~~~~~~^
+        text("""
+        ^^^^^^^^
+    ...<8 lines>...
+        }
+        ^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1463, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 533, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1683, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<9 lines>...
+        param_dict=param_dict,
+    )
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1837, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1977, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2347, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1958, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 170, in execute
+    result = self._query(query)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\cursors.py", line 335, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 581, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 857, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 1290, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 810, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\err.py", line 154, in raise_mysql_exception
+    raise errorclass(errno, errval, sqlstate=sqlstate)
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1205, 'Lock wait timeout exceeded; try restarting transaction')
+[SQL: 
+                    INSERT INTO auditoria (idUsuario, accion, detalle, direccionIp)
+                    VALUES (%(usuario)s, %(accion)s, %(detalle)s, %(ip)s)
+                ]
+[parameters: {'usuario': 8, 'accion': 'login_fallido', 'detalle': 'Contraseña incorrecto (3/5)', 'ip': '127.0.0.1'}]
+(Background on this error at: https://sqlalche.me/e/21/e3q8)

@@ -27,6 +27,16 @@ from sqlalchemy.exc import IntegrityError
 
 from modelo.conexion import engine
 
+from controlador.seguridad import (
+    LOCK_MAX_INTENTOS,
+    LOCK_MINUTES,
+    RESET_TOKEN_MINUTES,
+    SESSION_TIMEOUT_MINUTES,
+    VERIFICACION_TOKEN_MINUTES,
+    registrar_accion,
+    sesion_timeout,
+)
+
 
 ventas_bp = Blueprint("ventas", __name__)
 
@@ -72,7 +82,7 @@ def enviar_correo_verificacion(correo, nombre, token):
                 Verificar mi correo
             </a>
 
-            <p>Este enlace vence en 30 minutos.</p>
+            <p>Este enlace vence en {VERIFICACION_TOKEN_MINUTES} minutos.</p>
 
             <p>Si no creaste esta cuenta, ignora este mensaje.</p>
         """
@@ -144,7 +154,6 @@ def verificar_correo(token):
             ),
             tipo_mensaje="exito"
         )
-
     except Exception:
         current_app.logger.exception(
             "Error verificando el correo"
@@ -159,9 +168,6 @@ def verificar_correo(token):
             tipo_mensaje="error"
         )
 
-
-# Reenviar correo de verificación
-@ventas_bp.route("/reenviar-verificacion", methods=["GET", "POST"])
 
 # Reenviar correo de verificación
 @ventas_bp.route("/reenviar-verificacion", methods=["GET", "POST"])
@@ -224,13 +230,14 @@ def reenviar_verificacion():
                                     :token_hash,
                                     DATE_ADD(
                                         UTC_TIMESTAMP(),
-                                        INTERVAL 30 MINUTE
+                                        INTERVAL :minutos MINUTE
                                     )
                                 )
                             """),
                             {
                                 "id_usuario": usuario["idUsuario"],
-                                "token_hash": token_hash
+                                "token_hash": token_hash,
+                                "minutos": VERIFICACION_TOKEN_MINUTES,
                             }
                         )
 
@@ -299,11 +306,13 @@ def validar_sesion_activa():
         return None
 
     try:
-        with engine.connect() as conexion:
+        with engine.begin() as conexion:
 
-            sesion_valida = conexion.execute(
+            sesion = conexion.execute(
                 text("""
-                    SELECT 1
+                    SELECT idSesion,
+                           (fechaExpiracion IS NOT NULL
+                            AND fechaExpiracion <= UTC_TIMESTAMP()) AS expiro
                     FROM sesion_usuario
                     WHERE idUsuario = :id_usuario
                       AND tokenSesion = :token
@@ -312,10 +321,31 @@ def validar_sesion_activa():
                     "id_usuario": id_usuario,
                     "token": token
                 }
-            ).first()
+            ).mappings().first()
 
-        if not sesion_valida:
-            session.clear()
+            if not sesion:
+                session.clear()
+                return None
+
+            if sesion["expiro"]:
+                conexion.execute(
+                    text("DELETE FROM sesion_usuario WHERE idSesion = :id"),
+                    {"id": sesion["idSesion"]}
+                )
+                session.clear()
+                return None
+
+            # Ventana deslizante: la actividad renuueva la expiración.
+            conexion.execute(
+                text("""
+                    UPDATE sesion_usuario
+                    SET fechaExpiracion = DATE_ADD(
+                            UTC_TIMESTAMP(), INTERVAL :min MINUTE),
+                        fechaUltimaActividad = UTC_TIMESTAMP()
+                    WHERE idSesion = :id
+                """),
+                {"min": SESSION_TIMEOUT_MINUTES, "id": sesion["idSesion"]}
+            )
 
     except Exception:
         current_app.logger.exception(
@@ -367,7 +397,7 @@ def registro():
             try:
                 with engine.begin() as conexion:
 
-                    conexion.execute(
+                    resultado = conexion.execute(
                         text("""
                             INSERT INTO usuario
                                 (NombreCompleto, Correo, Usuario, Clave)
@@ -381,6 +411,24 @@ def registro():
                             "clave": clave_hash
                         }
                     )
+
+                    id_nuevo = resultado.lastrowid
+                    if id_nuevo:
+                        conexion.execute(
+                            text("""
+                                INSERT IGNORE INTO usuario_rol
+                                    (idUsuario, idRol)
+                                SELECT :u, idRol FROM rol
+                                WHERE nombreRol = 'Usuario'
+                            """),
+                            {"u": id_nuevo}
+                        )
+
+                registrar_accion(
+                    "registro_usuario",
+                    f"Nuevo usuario registrado: {correo}",
+                    id_usuario=id_nuevo,
+                )
 
                 mensaje = "¡Tu cuenta se creó correctamente!"
                 tipo_mensaje = "exito"
@@ -419,87 +467,164 @@ def login():
             mensaje_login="Ingresa tu correo y contraseña."
         )
 
+    # Los eventos de auditoría se acumulan y se registran fuera de la
+    # transacción: la FK de auditoria sobre usuario esperaría el lock
+    # que esta misma transacción mantiene abierto (deadlock).
+    eventos = []
+    respuesta = None
+    id_usuario = None
+    token = None
+
     try:
-        with engine.connect() as conexion:
+        with engine.begin() as conexion:
 
             usuario = conexion.execute(
                 text("""
-                    SELECT idUsuario, NombreCompleto, Clave
+                    SELECT idUsuario, NombreCompleto, Clave,
+                           intentosFallidos,
+                           fechaBloqueo > UTC_TIMESTAMP() AS bloqueado
                     FROM usuario
                     WHERE Correo = :correo
                 """),
                 {"correo": correo}
             ).mappings().first()
 
-        if not usuario or not check_password_hash(
-            usuario["Clave"], contrasena
-        ):
-            return render_template(
-                "index.html",
-                mensaje_login="Correo o contraseña incorrectos."
-            )
+            if not usuario:
+                respuesta = "Correo o contraseña incorrectos."
 
-        token = secrets.token_urlsafe(32)
+            elif usuario["bloqueado"]:
+                restante = conexion.execute(
+                    text("""
+                        SELECT TIMESTAMPDIFF(
+                            MINUTE, UTC_TIMESTAMP(), fechaBloqueo)
+                        FROM usuario WHERE idUsuario = :u
+                    """),
+                    {"u": usuario["idUsuario"]}
+                ).scalar() or 1
+                eventos.append((
+                    "intentos_bloqueado",
+                    f"Intento con cuenta bloqueada para {correo}",
+                    usuario["idUsuario"],
+                ))
+                respuesta = (
+                    "La cuenta está bloqueada temporalmente por "
+                    f"intentos fallidos. Espera {restante} minutos."
+                )
 
-        with engine.begin() as conexion:
+            elif not check_password_hash(usuario["Clave"], contrasena):
+                nuevos_intentos = usuario["intentosFallidos"] + 1
+                if nuevos_intentos >= LOCK_MAX_INTENTOS:
+                    conexion.execute(
+                        text("""
+                            UPDATE usuario
+                            SET intentosFallidos = 0,
+                                fechaBloqueo = DATE_ADD(
+                                    UTC_TIMESTAMP(), INTERVAL :min MINUTE)
+                            WHERE idUsuario = :u
+                        """),
+                        {"min": LOCK_MINUTES, "u": usuario["idUsuario"]}
+                    )
+                    eventos.append((
+                        "cuenta_bloqueada",
+                        f"Bloqueo por {LOCK_MAX_INTENTOS} intentos "
+                        "fallidos",
+                        usuario["idUsuario"],
+                    ))
+                    respuesta = (
+                        f"La cuenta se bloqueó por {LOCK_MINUTES} minutos "
+                        "tras varios intentos fallidos."
+                    )
+                else:
+                    conexion.execute(
+                        text(
+                            "UPDATE usuario SET intentosFallidos = :i "
+                            "WHERE idUsuario = :u"
+                        ),
+                        {"i": nuevos_intentos, "u": usuario["idUsuario"]}
+                    )
+                    eventos.append((
+                        "login_fallido",
+                        f"Contraseña incorrecta ({nuevos_intentos}/"
+                        f"{LOCK_MAX_INTENTOS})",
+                        usuario["idUsuario"],
+                    ))
+                    respuesta = "Correo o contraseña incorrectos."
 
-            sesion_existente = conexion.execute(
-                text("""
-                    SELECT idSesion
-                    FROM sesion_usuario
-                    WHERE idUsuario = :id_usuario
-                """),
-                {"id_usuario": usuario["idUsuario"]}
-            ).first()
+            else:
+                conexion.execute(
+                    text(
+                        "UPDATE usuario SET intentosFallidos = 0, "
+                        "fechaBloqueo = NULL WHERE idUsuario = :u"
+                    ),
+                    {"u": usuario["idUsuario"]}
+                )
 
-            if sesion_existente:
-                return render_template(
-                    "index.html",
-                    mensaje_login=(
+                nuevo_token = secrets.token_urlsafe(32)
+
+                sesion_existente = conexion.execute(
+                    text("""
+                        SELECT idSesion
+                        FROM sesion_usuario
+                        WHERE idUsuario = :id_usuario
+                    """),
+                    {"id_usuario": usuario["idUsuario"]}
+                ).first()
+
+                if sesion_existente:
+                    respuesta = (
                         "Esta cuenta ya tiene una sesión activa. "
                         "Cierra esa sesión antes de volver a ingresar."
                     )
-                )
-
-            conexion.execute(
-                text("""
-                    INSERT INTO sesion_usuario
-                        (idUsuario, tokenSesion)
-                    VALUES
-                        (:id_usuario, :token)
-                """),
-                {
-                    "id_usuario": usuario["idUsuario"],
-                    "token": token
-                }
-            )
-
-        session.clear()
-        session["id_usuario"] = usuario["idUsuario"]
-        session["token_sesion"] = token
-
-        return redirect(url_for("principal"))
+                else:
+                    conexion.execute(
+                        text("""
+                            INSERT INTO sesion_usuario
+                                (idUsuario, tokenSesion, fechaExpiracion)
+                            VALUES (
+                                :id_usuario,
+                                :token,
+                                DATE_ADD(UTC_TIMESTAMP(),
+                                         INTERVAL :min MINUTE)
+                            )
+                        """),
+                        {
+                            "id_usuario": usuario["idUsuario"],
+                            "token": nuevo_token,
+                            "min": SESSION_TIMEOUT_MINUTES,
+                        }
+                    )
+                    eventos.append((
+                        "login_exitoso",
+                        f"Inicio de sesión de {correo}",
+                        usuario["idUsuario"],
+                    ))
+                    id_usuario = usuario["idUsuario"]
+                    token = nuevo_token
 
     except IntegrityError:
-        return render_template(
-            "index.html",
-            mensaje_login=(
-                "Esta cuenta ya tiene una sesión activa. "
-                "Cierra esa sesión antes de volver a ingresar."
-            )
+        respuesta = (
+            "Esta cuenta ya tiene una sesión activa. "
+            "Cierra esa sesión antes de volver a ingresar."
         )
 
     except Exception:
         current_app.logger.exception(
             "Error durante el inicio de sesión"
         )
+        respuesta = "No se pudo iniciar sesión. Inténtalo más tarde."
 
-        return render_template(
-            "index.html",
-            mensaje_login=(
-                "No se pudo iniciar sesión. Inténtalo más tarde."
-            )
-        )
+    for accion, detalle, id_evento in eventos:
+        registrar_accion(accion, detalle, id_usuario=id_evento)
+
+    if respuesta:
+        return render_template("index.html", mensaje_login=respuesta)
+
+    session.clear()
+    session.permanent = True
+    session["id_usuario"] = id_usuario
+    session["token_sesion"] = token
+
+    return redirect(url_for("principal"))
 
 
 @ventas_bp.route("/logout", methods=["POST"])
@@ -536,6 +661,10 @@ def logout():
         )
 
     finally:
+        registrar_accion(
+            "cierre_sesion",
+            id_usuario=id_usuario,
+        )
         session.clear()
 
     return redirect(url_for("inicio"))

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru | Auditoría</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Guru</h1>
+        <nav>
+            <a href="{{ url_for('principal') }}">Mi cuenta</a>
+            <a href="{{ url_for('admin.usuarios') }}">Usuarios</a>
+            <a href="{{ url_for('admin.roles') }}">Roles</a>
+            <a href="{{ url_for('admin.auditoria') }}">Auditoría</a>
+        </nav>
+    </header>
+    <main>
+        <section class="panel">
+            <h1>Registros de auditoría</h1>
+            <p class="subtitulo">Últimos 200 eventos del sistema.</p>
+
+            <form method="GET" class="crear-rol">
+                <label for="accion">Filtrar por acción</label>
+                <input type="text" id="accion" name="accion"
+                       value="{{ filtro }}"
+                       placeholder="p. ej. login, cambio_clave, subida">
+                <button type="submit">Filtrar</button>
+            </form>
+
+            {% if eventos %}
+                <table class="lista">
+                    <tr>
+                        <th>Fecha (UTC)</th>
+                        <th>Usuario</th>
+                        <th>Acción</th>
+                        <th>Detalle</th>
+                        <th>IP</th>
+                    </tr>
+                    {% for e in eventos %}
+                        <tr>
+                            <td>{{ e.fecha }}</td>
+                            <td>{{ e.Usuario or '—' }}</td>
+                            <td>{{ e.accion }}</td>
+                            <td>{{ e.detalle or '' }}</td>
+                            <td>{{ e.direccionIp or '' }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No hay eventos registrados.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
