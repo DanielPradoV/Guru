@@ -5,7 +5,6 @@ import hashlib
 import json
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-import resend
 import re
 import secrets
 
@@ -31,6 +30,7 @@ from sqlalchemy.exc import IntegrityError
 
 from modelo.conexion import engine
 
+from controlador.correo import enviar, proveedor_activo
 from controlador.seguridad import (
     LOCK_MAX_INTENTOS,
     LOCK_MINUTES,
@@ -43,20 +43,10 @@ from controlador.seguridad import (
 ventas_bp = Blueprint("ventas", __name__)
 
 
-# Configuración de Resend
+# Los enlaces se construyen con url_for(_external=True) sobre el request,
+# y ProxyFix ya pone https + el dominio real cuando la app corre detrás de
+# Render/Cloudflare, así que no hace falta una variable de URL base.
 load_dotenv()
-
-resend.api_key = os.getenv("RESEND_API_KEY")
-
-REMITENTE = os.getenv(
-    "RESEND_FROM_EMAIL",
-    "Guru <onboarding@resend.dev>"
-)
-
-URL_BASE = os.getenv(
-    "APP_BASE_URL",
-    "http://127.0.0.1:5000"
-)
 
 
 # Enviar correo de verificación
@@ -68,11 +58,10 @@ def enviar_correo_verificacion(correo, nombre, token):
         _external=True
     )
 
-    resultado = resend.Emails.send({
-        "from": REMITENTE,
-        "to": [correo],
-        "subject": "Verifica tu correo electrónico - Guru",
-        "html": f"""
+    return enviar(
+        correo,
+        "Verifica tu correo electrónico - Guru",
+        f"""
             <h2>¡Bienvenido a Guru, {nombre}!</h2>
 
             <p>Gracias por crear tu cuenta.</p>
@@ -88,9 +77,7 @@ def enviar_correo_verificacion(correo, nombre, token):
 
             <p>Si no creaste esta cuenta, ignora este mensaje.</p>
         """
-    })
-
-    return resultado
+    )
 
 
 # Verificar correo electrónico
@@ -250,11 +237,12 @@ def reenviar_verificacion():
                             token
                         )
 
-                        print("\n========== RESEND ==========")
-                        print("DEBUG: SE EJECUTÓ LA NUEVA FUNCIÓN DE REENVÍO")
-                        print("Destinatario:", usuario["Correo"])
-                        print("Respuesta:", repr(resultado))
-                        print("============================\n")
+                        current_app.logger.info(
+                            "Correo de verificación enviado por %s a %s: %r",
+                            proveedor_activo(),
+                            usuario["Correo"],
+                            resultado
+                        )
 
                         mensaje = (
                             "El correo de verificación fue enviado "
@@ -269,16 +257,11 @@ def reenviar_verificacion():
                         )
                         tipo_mensaje = "error"
 
-            except Exception as error:
+            except Exception:
 
                 current_app.logger.exception(
                     "Error al reenviar el correo de verificación"
                 )
-
-                print("\n========== ERROR DE REENVÍO ==========")
-                print("Tipo de error:", type(error).__name__)
-                print("Detalle:", repr(error))
-                print("======================================\n")
 
                 mensaje = (
                     "No se pudo enviar el correo. "

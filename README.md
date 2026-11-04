@@ -25,9 +25,27 @@ despliegue en Render no dispone de shell para correr migraciones a mano.
 | `RESET_TOKEN_MINUTES` | respaldo de la validez de los tokens de autenticación | 30 |
 | `LOCK_MAX_INTENTOS`, `LOCK_MINUTES` | bloqueo de cuenta tras intentos fallidos | 5 / 15 |
 | `MAX_UPLOAD_BYTES` | tamaño máximo de archivo subido | 5 MB |
-| `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `APP_BASE_URL` | envío de correos | — |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | envío de correos por SMTP directo | `smtp.gmail.com` / `587` / — |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | envío de correos por Resend (respaldo) | — |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | administrador que se siembra al arrancar | desactivado |
 | `ADMIN_USUARIO`, `ADMIN_NOMBRE` | datos opcionales de ese administrador | derivados del correo |
+
+## Envío de correos
+
+`controlador/correo.py` decide el proveedor con las variables de entorno y
+es el único punto que habla con el exterior; las rutas de verificación y de
+recuperación solo le piden `enviar(destinatario, asunto, html)`.
+
+- Con `SMTP_USER` **y** `SMTP_PASSWORD` definidos, envía por SMTP directo
+  (`smtplib`, sin dependencias externas) y entrega a cualquier dirección.
+  Para Gmail hay que activar la verificación en dos pasos y generar una
+  [contraseña de aplicación](https://myaccount.google.com/apppasswords);
+  el remitente es esa misma cuenta (`SMTP_FROM` solo añade nombre visible).
+- Si no, usa `RESEND_API_KEY`. En la cuenta de pruebas de Resend solo
+  entrega al correo con el que te registraste.
+- Si no hay ninguno, `enviar` lanza excepción y la ruta muestra el aviso de
+  "no se pudo enviar"; el token se revierte junto con la transacción, así
+  que no quedan enlaces vivos de un correo que nunca salió.
 
 ## Usuario administrador
 

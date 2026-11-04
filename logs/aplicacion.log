@@ -361,3 +361,318 @@ sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1205, 'Lock wai
                 ]
 [parameters: {'usuario': 8, 'accion': 'login_fallido', 'detalle': 'Contraseña incorrecto (3/5)', 'ip': '127.0.0.1'}]
 (Background on this error at: https://sqlalche.me/e/21/e3q8)
+2026-11-03 21:18:50,704 ERROR en app: No se pudo aplicar la migración del esquema al arrancar [en C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\app.py:66]
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 681, in connect
+    sock = socket.create_connection(
+        (self.host, self.port), self.connect_timeout, **kwargs
+    )
+  File "C:\Users\Pipe\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 868, in create_connection
+    raise exceptions[0]
+  File "C:\Users\Pipe\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 853, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+ConnectionRefusedError: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 149, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3299, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 445, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 1324, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 709, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\impl.py", line 176, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\impl.py", line 174, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 386, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 671, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 916, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 912, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\create.py", line 645, in connect
+    return dialect.connect(*cargs_tup, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 869, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 373, in __init__
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 744, in connect
+    raise exc
+pymysql.err.OperationalError: (2003, "Can't connect to MySQL server on '127.0.0.1' ([WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión)")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\app.py", line 64, in <module>
+    ensure_esquema()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\modelo\migraciones.py", line 176, in ensure_esquema
+    with engine.begin() as c:
+         ~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3239, in begin
+    with self.connect() as conn:
+         ~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3275, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 151, in __init__
+    Connection._handle_dbapi_exception_noconnection(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        err, dialect, engine
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2432, in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 149, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3299, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 445, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 1324, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 709, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\impl.py", line 176, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\impl.py", line 174, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 386, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 671, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 916, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 912, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\create.py", line 645, in connect
+    return dialect.connect(*cargs_tup, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 869, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 373, in __init__
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 744, in connect
+    raise exc
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (2003, "Can't connect to MySQL server on '127.0.0.1' ([WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión)")
+(Background on this error at: https://sqlalche.me/e/21/e3q8)
+2026-11-03 21:18:53,405 ERROR en app: Error al solicitar el restablecimiento de clave [en C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\cuenta_controlador.py:174]
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 681, in connect
+    sock = socket.create_connection(
+        (self.host, self.port), self.connect_timeout, **kwargs
+    )
+  File "C:\Users\Pipe\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 868, in create_connection
+    raise exceptions[0]
+  File "C:\Users\Pipe\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 853, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+ConnectionRefusedError: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 149, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3299, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 445, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 1324, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 709, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\impl.py", line 176, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\impl.py", line 174, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 386, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 671, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 916, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 912, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\create.py", line 645, in connect
+    return dialect.connect(*cargs_tup, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 869, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 373, in __init__
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 744, in connect
+    raise exc
+pymysql.err.OperationalError: (2003, "Can't connect to MySQL server on '127.0.0.1' ([WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión)")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\cuenta_controlador.py", line 95, in recuperar_contrasena
+    with engine.begin() as conexion:
+         ~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3239, in begin
+    with self.connect() as conn:
+         ~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3275, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 151, in __init__
+    Connection._handle_dbapi_exception_noconnection(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        err, dialect, engine
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2432, in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 149, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3299, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 445, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 1324, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 709, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\impl.py", line 176, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\impl.py", line 174, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 386, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 671, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 916, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 912, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\create.py", line 645, in connect
+    return dialect.connect(*cargs_tup, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 869, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 373, in __init__
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\pymysql\connections.py", line 744, in connect
+    raise exc
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (2003, "Can't connect to MySQL server on '127.0.0.1' ([WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión)")
+(Background on this error at: https://sqlalche.me/e/21/e3q8)
+2026-11-03 21:19:51,999 ERROR en app: Error al solicitar el restablecimiento de clave [en C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\cuenta_controlador.py:174]
+Traceback (most recent call last):
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\cuenta_controlador.py", line 142, in recuperar_contrasena
+    resultado = enviar_correo_restablecimiento(
+        usuario["Correo"],
+        usuario["NombreCompleto"],
+        token
+    )
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\cuenta_controlador.py", line 64, in enviar_correo_restablecimiento
+    return enviar(
+        correo,
+    ...<10 lines>...
+        """
+    )
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\correo.py", line 64, in enviar
+    return _enviar_resend(destinatario, asunto, html)
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\controlador\correo.py", line 108, in _enviar_resend
+    return resend.Emails.send({
+           ~~~~~~~~~~~~~~~~~~^^
+        "from": REMITENTE_RESEND,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        "html": html,
+        ^^^^^^^^^^^^^
+    })
+    ^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\resend\emails\_emails.py", line 512, in send
+    ).perform_with_content()
+      ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\resend\request.py", line 70, in perform_with_content
+    resp = self.perform()
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\resend\request.py", line 50, in perform
+    raise_for_code_and_type(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        code=error_code or 500,
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        headers=self._response_headers,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Pipe\Documents\Estudios\Ing.Sistemas\3 semestre\ProyectoFinal\Guru\.venv\Lib\site-packages\resend\exceptions.py", line 277, in raise_for_code_and_type
+    raise ResendError(
+    ...<5 lines>...
+    )
+resend.exceptions.ResendError: You can only send testing emails to your own email address (danielverano016@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.

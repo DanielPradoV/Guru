@@ -5,7 +5,6 @@ import re
 import secrets
 import uuid
 
-import resend
 from dotenv import load_dotenv
 
 from flask import (
@@ -25,6 +24,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from modelo.conexion import engine
 
+from controlador.correo import enviar, proveedor_activo
 from controlador.seguridad import (
     minutos_token,
     registrar_accion,
@@ -33,11 +33,6 @@ from controlador.seguridad import (
 cuenta_bp = Blueprint("cuenta", __name__)
 
 load_dotenv()
-resend.api_key = os.getenv("RESEND_API_KEY")
-REMITENTE = os.getenv(
-    "RESEND_FROM_EMAIL",
-    "Guru <onboarding@resend.dev>"
-)
 
 RUTA_SUBIDAS = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Subidas"
@@ -66,11 +61,10 @@ def enviar_correo_restablecimiento(correo, nombre, token):
         _external=True
     )
 
-    return resend.Emails.send({
-        "from": REMITENTE,
-        "to": [correo],
-        "subject": "Restablece tu contraseña - Guru",
-        "html": f"""
+    return enviar(
+        correo,
+        "Restablece tu contraseña - Guru",
+        f"""
             <h2>Hola, {nombre}</h2>
             <p>Recibimos una solicitud para restablecer tu contraseña
             en Guru.</p>
@@ -80,7 +74,7 @@ def enviar_correo_restablecimiento(correo, nombre, token):
             <p>Si no solicitaste el cambio, ignora este mensaje; tu
             contraseña actual seguirá siendo válida.</p>
         """
-    })
+    )
 
 
 @cuenta_bp.route("/recuperar-contrasena", methods=["GET", "POST"])
@@ -151,7 +145,9 @@ def recuperar_contrasena():
                             token
                         )
                         current_app.logger.info(
-                            "Resend (restablecimiento) respondió: %r",
+                            "Correo de restablecimiento por %s a %s: %r",
+                            proveedor_activo(),
+                            usuario["Correo"],
                             resultado
                         )
 
