@@ -80,9 +80,79 @@ los lee en cada uso, así que el cambio toma efecto en la misma petición:
   restablecimiento de contraseña. Al **reducirlo**, los enlaces ya emitidos
   se recortan a la ventana nueva.
 
-Los valores de entorno son solo el respaldo mientras la tabla no exista.
-Cada guardado se registra en auditoría con la acción
+Los valores de entorno son solo el respaldo mientras la tabla no exista:
+se usan cuando la tabla todavía no se ha creado (el arranque necesita el
+tiempo de sesión antes de que corra la migración) o cuando la base de datos
+no responde. Cada guardado se registra en auditoría con la acción
 `cambio_configuracion`.
+
+## Decisiones de diseño
+
+### Sesión y autenticación
+
+- Una cuenta solo puede tener **una sesión activa** (`sesion_usuario`); el
+  segundo inicio es rechazado hasta que se cierre la primera.
+- Antes de buscar la sesión activa se depuran las filas caducadas y las que
+  nacieron sin `fechaExpiracion` (heredadas de versiones anteriores a la
+  migración): sin fecha nunca vencerían y bloquearían el acceso del usuario.
+- La expiración es una **ventana deslizante**: cada petición válida mueve
+  `fechaUltimaActividad` y `fechaExpiracion`. La página principal manda un
+  latido a `/keepalive` cada 60 s mientras la pestaña está abierta, así que
+  una sesión no se corta por inactividad falsa, pero sí vence si nadie la
+  usa. La cookie de Flask (`session.permanent`) sigue el mismo criterio y su
+  tiempo de vida se recalcula por petición, para que el panel surta efecto
+  sin reiniciar el servidor.
+- Cambiar la contraseña —desde el perfil o desde el panel de Usuarios— cierra
+  **todas** las sesiones activas de esa cuenta.
+
+### Correos y despliegue detrás de proxy
+
+- Render termina TLS antes de llegar a la app, por eso se aplica `ProxyFix`:
+  sin él los enlaces se generan con `http` y con el host interno. Con
+  ProxyFix puesto, `url_for(..., _external=True)` produce la URL pública
+  correcta, así que no existe una variable de "URL base".
+- El correo se envía **antes** de confirmar la transacción; si el envío
+  falla, el token se revierte con todo lo demás.
+- La recuperación de contraseña responde siempre el mismo mensaje: no se
+  revela si el correo existe o no en la base de datos.
+
+### Auditoría y logs
+
+- `registrar_accion()` se llama **fuera** de la transacción de negocio. La
+  clave foránea de `auditoria` sobre `usuario` esperaría el lock que esa
+  misma transacción sostiene y provocaría un deadlock.
+- Los fallos técnicos se escriben además en `logs/aplicacion.log`; los
+  registros de auditoría de negocio viven solo en la tabla `auditoria`.
+
+### Roles y permisos
+
+- El rol `Administrador` recibe todos los permisos **solo al crearse**;
+  después se administra desde el panel.
+- Los permisos que estrena una migración se conceden al `Administrador` una
+  sola vez (los recién creados). Así, un permiso retirado a mano desde el
+  panel de Roles sigue retirado después de un relanzamiento.
+- El primer usuario registrado queda como administrador para que el panel
+  sea alcanzable; se puede reasignar desde la interfaz.
+- Al crear o editar un usuario desde el panel también se le exige la
+  complejidad de contraseña: un administrador no puede imponer una clave débil.
+
+### Subida de archivos
+
+- `MAX_CONTENT_LENGTH` limita el cuerpo de la petición al valor de
+  `MAX_UPLOAD_BYTES`.
+- Se valida la firma binaria real (*magic bytes*), no la extensión: un
+  `.exe` renombrado como `.pdf` se rechaza. WEBP se confirma en el
+  desplazamiento 8 de la cabecera.
+- El nombre del archivo en disco lo genera el servidor; el nombre enviado
+  por el cliente nunca se usa como ruta.
+
+### Base de datos
+
+- El esquema se asegura al arrancar con una migración aditiva e idempotente,
+  porque el despliegue en Render no dispone de shell.
+- Todas las fechas se guardan en `DATETIME` escritas con `UTC_TIMESTAMP()`,
+  nunca con la hora local del servidor.
+- SSL solo se activa cuando el host de la base de datos no es local.
 
 ## Métricas de uso
 

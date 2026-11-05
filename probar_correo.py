@@ -13,7 +13,6 @@ if not api_key or not remitente:
 
 resend.api_key = api_key
 
-# Reemplaza este valor por el correo de tu cuenta de Resend.
 destinatario = "danielverano016@gmail.com"
 
 try:

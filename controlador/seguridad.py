@@ -9,15 +9,9 @@ from sqlalchemy import text
 
 from modelo.conexion import engine
 
-# Configuración ajustable por variables de entorno
 LOCK_MAX_INTENTOS = int(os.getenv("LOCK_MAX_INTENTOS", "5"))
 LOCK_MINUTES = int(os.getenv("LOCK_MINUTES", "15"))
 
-# Los tiempos de expiración se editan desde el panel de administración y
-# viven en la tabla configuracion_seguridad. Estos valores de entorno son
-# solo el respaldo: se usan cuando la tabla aún no existe (el arranque
-# necesita sesion_timeout() antes de que corra la migración) o cuando la
-# base de datos no responde.
 VALORES_RESPALDO = {
     "sesion_minutos": int(os.getenv("SESSION_TIMEOUT_MINUTES", "30")),
     "token_minutos": int(os.getenv("RESET_TOKEN_MINUTES", "30")),
@@ -42,8 +36,7 @@ CONFIGURACION = {
 
 
 def configuracion_seguridad():
-    """Lee los tiempos configurables; si la tabla no está disponible
-    devuelve los respaldos de entorno para no romper el arranque."""
+    """Tiempos configurables, con respaldo de entorno si falta la tabla."""
     valores = dict(VALORES_RESPALDO)
 
     try:
@@ -65,8 +58,7 @@ def configuracion_seguridad():
 
 
 def establecer_configuracion(clave, valor):
-    """Guarda un tiempo editable (INSERT ... ON DUPLICATE para poder
-    escribir aunque la siembra inicial no haya corrido)."""
+    """Guarda un tiempo editable, exista o no la fila."""
     metadatos = CONFIGURACION[clave]
 
     with engine.begin() as conexion:
@@ -96,8 +88,7 @@ def minutos_token():
 
 
 def registrar_accion(accion, detalle=None, id_usuario=None):
-    """Escribe un evento en la tabla auditoria. Nunca interrumpe la acción
-    principal si el registro falla."""
+    """Escribe un evento en auditoria sin interrumpir la acción principal."""
     if id_usuario is None:
         id_usuario = session.get("id_usuario")
 

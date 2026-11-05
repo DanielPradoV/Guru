@@ -122,7 +122,6 @@ main {
     color: #64748b;
     font-size: 12px;
 }
-/* --- Nuevas vistas: paneles, mensajes y tablas --- */
 .mensaje-error {
     color: #b91c1c;
     background: #fee2e2;
@@ -234,7 +233,6 @@ main {
     padding: 2px 6px;
 }
 
-/* --- Estadísticas de uso --- */
 .tarjetas-metricas {
     display: flex;
     flex-wrap: wrap;
@@ -276,7 +274,6 @@ main {
     margin: 24px 0 12px;
 }
 
-/* Configuración de expiraciones (panel de administración) */
 .formulario-config {
     display: flex;
     flex-direction: column;

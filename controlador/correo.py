@@ -1,16 +1,4 @@
-"""Envío de correo de Guru.
-
-Dos proveedores, elegidos con las variables de entorno:
-
-- SMTP directo (`SMTP_USER` + `SMTP_PASSWORD`): sin servicio externo y
-  entrega a cualquier destinatario. Es la vía que usa Gmail con una
-  "contraseña de aplicación".
-- Resend (`RESEND_API_KEY`): se conserva como respaldo; en la cuenta de
-  pruebas (sandbox) solo entrega al correo verificado del registro.
-
-Si no hay ninguno configurado, `enviar` falla de forma explícita en lugar
-de enviar a la basura el enlace de recuperación.
-"""
+"""Envío de correo: SMTP directo si hay credenciales, si no Resend."""
 import os
 import smtplib
 import ssl
@@ -24,8 +12,6 @@ SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PUERTO = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USUARIO = os.getenv("SMTP_USER", "").strip()
 SMTP_CLAVE = os.getenv("SMTP_PASSWORD", "")
-# Gmail y la mayoría de relayes exigen que el remitente sea la propia
-# cuenta autenticada; se puede añadir nombre visible, no otra dirección.
 SMTP_DE = os.getenv("SMTP_FROM", "").strip()
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
@@ -49,13 +35,7 @@ def proveedor_activo():
 
 
 def enviar(destinatario, asunto, html):
-    """Envía un correo y devuelve una descripción de la respuesta.
-
-    Lanza excepción si el envío no es posible: las rutas que llaman a este
-    helper ya muestran un mensaje genérico de "inténtalo más tarde" y
-    revierten la transacción, así que el token no queda colgado de un
-    correo que nunca salió.
-    """
+    """Envía un correo; lanza excepción si el envío no es posible."""
 
     if proveedor_activo().startswith("smtp"):
         return _enviar_smtp(destinatario, asunto, html)

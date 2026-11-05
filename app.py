@@ -26,22 +26,14 @@ if not app.secret_key:
         "Falta configurar la variable de entorno SECRET_KEY."
     )
 
-# Render/los proxies terminan TLS antes de la app: sin esto los enlaces
-# de correo se generan con http y con el host interno en vez del dominio.
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Cookie de sesión con expiración configurable y ventana deslizante:
-# se renueva en cada petición activa hasta el valor que defina el
-# administrador en /admin/configuracion.
 app.permanent_session_lifetime = sesion_timeout()
 
-# Límite de tamaño para la subida de archivos (punto 15).
 app.config["MAX_CONTENT_LENGTH"] = int(
     os.getenv("MAX_UPLOAD_BYTES", 5 * 1024 * 1024)
 )
 
-# Logs de la aplicación también a archivo para poder auditar fallos
-# (los registros de auditoría de negocio viven en la tabla auditoria).
 _log_dir = os.path.join(app.root_path, "logs")
 os.makedirs(_log_dir, exist_ok=True)
 _handler = RotatingFileHandler(
@@ -57,8 +49,6 @@ _handler.setLevel(logging.INFO)
 app.logger.addHandler(_handler)
 app.logger.setLevel(logging.INFO)
 
-# El esquema de la base de datos se asegura al arrancar: es una migración
-# aditiva e idempotente, necesaria en despliegues donde no hay shell.
 try:
     from modelo.migraciones import ensure_esquema
     ensure_esquema()

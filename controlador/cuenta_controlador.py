@@ -38,20 +38,15 @@ RUTA_SUBIDAS = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Subidas"
 )
 
-# Extensiones permitidas y su firma binaria real (magic bytes).
 MAGICOS = {
     "pdf": [b"%PDF"],
     "png": [b"\x89PNG\r\n\x1a\n"],
     "jpg": [b"\xff\xd8\xff"],
     "jpeg": [b"\xff\xd8\xff"],
     "gif": [b"GIF8"],
-    "webp": [b"RIFF"],  # se confirma WEBP en desplaz 8
+    "webp": [b"RIFF"],
 }
 
-
-# -----------------------------------------------------------------
-# Recuperación de contraseña (punto 3)
-# -----------------------------------------------------------------
 
 def enviar_correo_restablecimiento(correo, nombre, token):
 
@@ -153,8 +148,6 @@ def recuperar_contrasena():
 
                         usuario_id = usuario["idUsuario"]
 
-                # La auditoría se registra fuera de la transacción para
-                # no esperar el lock sobre la fila de usuario.
                 if usuario_id:
                     registrar_accion(
                         "restablecimiento_solicitado",
@@ -162,8 +155,6 @@ def recuperar_contrasena():
                         id_usuario=usuario_id,
                     )
 
-                # Respuesta genérica a propósito: no revelamos si el
-                # correo existe o no en la base de datos.
                 mensaje = (
                     "Si el correo está registrado, enviamos un enlace "
                     "para restablecer la contraseña."
@@ -258,7 +249,6 @@ def restablecer_contrasena(token):
                         {"r": registro["idRestablecimiento"]}
                     )
 
-                    # Por seguridad se cierran todas las sesiones activas.
                     conexion.execute(
                         text(
                             "DELETE FROM sesion_usuario "
@@ -300,10 +290,6 @@ def restablecer_contrasena(token):
         tipo_mensaje=tipo_mensaje
     )
 
-
-# -----------------------------------------------------------------
-# Perfil del usuario (punto 20)
-# -----------------------------------------------------------------
 
 @cuenta_bp.route("/perfil", methods=["GET", "POST"])
 def perfil():
@@ -481,13 +467,8 @@ def perfil():
     )
 
 
-# -----------------------------------------------------------------
-# Subida de archivos con validación de contenido (punto 15)
-# -----------------------------------------------------------------
-
 def tipo_real_por_magicos(cabecera, extension):
-    """Devuelve None si el contenido binario no corresponde con una
-    extensión permitida. Detecta p.ej. un .exe renombrado como .pdf."""
+    """None si el binario no corresponde con la extensión declarada."""
     if cabecera[:2] == b"MZ":
         return "ejecutable"
     firmas = MAGICOS.get(extension, [])

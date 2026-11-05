@@ -31,10 +31,6 @@ admin_bp = Blueprint("admin", __name__)
 DIAS_ESTADISTICAS = 14
 
 
-# -----------------------------------------------------------------
-# Gestión de usuarios (puntos 6-7-8)
-# -----------------------------------------------------------------
-
 @admin_bp.route("/admin/usuarios")
 @requiere_permiso("gestionar_usuarios")
 def usuarios():
@@ -80,7 +76,6 @@ def cambiar_clave(id_usuario):
 
     nueva = request.form.get("clave_nueva", "")
 
-    # Un administrador tampoco puede imponer una contraseña débil.
     if len(nueva) < 8:
         mensaje = "La contraseña debe tener al menos 8 caracteres."
         tipo = "error"
@@ -108,7 +103,6 @@ def cambiar_clave(id_usuario):
                             "u": id_usuario,
                         }
                     )
-                    # Se cierran las sesiones activas del usuario.
                     conexion.execute(
                         text(
                             "DELETE FROM sesion_usuario "
@@ -180,10 +174,6 @@ def asignar_roles(id_usuario):
 
     return redirect(url_for("admin.usuarios"))
 
-
-# -----------------------------------------------------------------
-# Gestión de roles y permisos (puntos 5 y 8)
-# -----------------------------------------------------------------
 
 @admin_bp.route("/admin/roles", methods=["GET", "POST"])
 @requiere_permiso("gestionar_roles")
@@ -301,10 +291,6 @@ def editar_permisos(id_rol):
     return redirect(url_for("admin.roles"))
 
 
-# -----------------------------------------------------------------
-# Visor de auditoría (punto 9)
-# -----------------------------------------------------------------
-
 @admin_bp.route("/auditoria")
 @requiere_permiso("ver_auditoria")
 def auditoria():
@@ -345,10 +331,6 @@ def auditoria():
 
     return render_template("auditoria.html", eventos=filas, filtro=filtro)
 
-
-# -----------------------------------------------------------------
-# Métricas de uso: visitas y tiempo de permanencia
-# -----------------------------------------------------------------
 
 @admin_bp.route("/admin/estadisticas")
 @requiere_permiso("ver_auditoria")
@@ -467,10 +449,6 @@ def estadisticas():
     )
 
 
-# -----------------------------------------------------------------
-# Configuración de expiraciones (puntos 10 y 11)
-# -----------------------------------------------------------------
-
 @admin_bp.route("/admin/configuracion", methods=["GET", "POST"])
 @requiere_permiso("gestionar_configuracion")
 def configuracion():
@@ -489,8 +467,6 @@ def configuracion():
 
                 with engine.begin() as conexion:
 
-                    # Las sesiones vivas pasan a la nueva ventana: si se
-                    # acorta, ninguna puede quedarse con el tiempo viejo.
                     if nuevos["sesion_minutos"] != actuales["sesion_minutos"]:
                         conexion.execute(
                             text("""
@@ -504,8 +480,6 @@ def configuracion():
                             {"min": nuevos["sesion_minutos"]},
                         )
 
-                    # Al reducir la validez del token, los enlaces ya
-                    # emitidos se recortan a la ventana nueva.
                     if nuevos["token_minutos"] < actuales["token_minutos"]:
                         for tabla in ("restablecimiento_clave",
                                       "verificacion_correo"):
@@ -522,8 +496,6 @@ def configuracion():
                                 {"min": nuevos["token_minutos"]},
                             )
 
-                # La cookie de esta misma petición ya nace con el nuevo
-                # tiempo de vida.
                 current_app.permanent_session_lifetime = sesion_timeout()
 
                 diferencia = [

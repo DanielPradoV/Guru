@@ -1,12 +1,6 @@
-"""Migración aditiva del esquema de Guru.
+"""Migración aditiva e idempotente del esquema de Guru.
 
-Crea tablas y columnas nuevas (roles, permisos, auditoría, bloqueo,
-expiración de sesión, restablecimiento de clave, archivos, visitas). Es
-idempotente: puede ejecutarse varias veces sin duplicar nada ni destruir
-datos.
-
-Se aplica automáticamente al arrancar la aplicación y también puede
-ejecutarse a mano:  python -m modelo.migraciones
+Se aplica al arrancar; también a mano con  python -m modelo.migraciones
 """
 import os
 
@@ -154,10 +148,6 @@ ROLES_BASE = {"Usuario": ["ver_productos", "subir_archivos"]}
 ROL_ADMIN = "Administrador"
 ROL_USUARIO_SEMILLA = "Usuario"
 
-# Valores iniciales de los tiempos editables desde el panel. Solo se
-# insertan si la clave no existe, para no pisar lo que ya decidió el
-# administrador; la variable de entorno sigue siendo el respaldo cuando
-# la tabla está vacía.
 CONFIGURACION_BASE = [
     (
         "sesion_minutos",
@@ -188,8 +178,6 @@ def ensure_esquema():
         agregar_columna(c, "sesion_usuario", "fechaExpiracion", "DATETIME NULL")
         agregar_columna(c, "sesion_usuario", "fechaUltimaActividad", "DATETIME NULL")
 
-        # Las sesiones sin fecha de expiración son previas a esta migración:
-        # nunca vencerían y bloquearían el nuevo inicio de sesión del usuario.
         borrar_muertas = c.execute(
             text("""
                 DELETE FROM sesion_usuario
@@ -233,8 +221,6 @@ def ensure_esquema():
                 text("SELECT idRol FROM rol WHERE nombreRol = :n"), {"n": ROL_ADMIN}
             ).scalar()
 
-        # El rol Administrador recibe todos los permisos solo al crearlo;
-        # después se administra desde el panel.
         if id_admin is not None:
             tiene = c.execute(
                 text("SELECT 1 FROM rol_permiso WHERE idRol = :r LIMIT 1"), {"r": id_admin}
@@ -245,10 +231,6 @@ def ensure_esquema():
                     {"r": id_admin},
                 )
 
-        # Los permisos que esta migración acaba de estrenar se conceden al
-        # Administrador para que la pestaña nueva sea alcanzable desde ya;
-        # en relanzamientos siguientes ya no se re-escriben, así un permiso
-        # retirado a mano desde el panel de Roles sigue retirado.
         if id_admin is not None and permisos_nuevos:
             for codigo in permisos_nuevos:
                 c.execute(
@@ -287,8 +269,6 @@ def ensure_esquema():
                 {"r": id_usuario_rol},
             )
 
-        # El primer usuario registrado queda como administrador para poder
-        # entrar al panel; se puede reasignar después desde la interfaz.
         primer_usuario = c.execute(
             text("SELECT idUsuario FROM usuario ORDER BY idUsuario LIMIT 1")
         ).scalar()
@@ -304,13 +284,7 @@ def ensure_esquema():
 
 
 def asegurar_administrador():
-    """Crea el administrador definido por ADMIN_EMAIL / ADMIN_PASSWORD.
-
-    Render no da shell para correr scripts, así que el administrador se
-    siembra al arrancar desde las variables de entorno. Si el correo ya
-    existe solo se le asegura el rol Administrador; la contraseña nunca se
-    reescribe, para no deshacer un cambio hecho desde el panel.
-    """
+    """Siembra al administrador de ADMIN_EMAIL sin pisar su contraseña."""
     correo = os.getenv("ADMIN_EMAIL", "").strip().lower()
     clave = os.getenv("ADMIN_PASSWORD", "")
 

@@ -43,13 +43,9 @@ from controlador.seguridad import (
 ventas_bp = Blueprint("ventas", __name__)
 
 
-# Los enlaces se construyen con url_for(_external=True) sobre el request,
-# y ProxyFix ya pone https + el dominio real cuando la app corre detrás de
-# Render/Cloudflare, así que no hace falta una variable de URL base.
 load_dotenv()
 
 
-# Enviar correo de verificación
 def enviar_correo_verificacion(correo, nombre, token):
 
     enlace = url_for(
@@ -80,7 +76,6 @@ def enviar_correo_verificacion(correo, nombre, token):
     )
 
 
-# Verificar correo electrónico
 @ventas_bp.route("/verificar-correo/<token>")
 def verificar_correo(token):
 
@@ -158,7 +153,6 @@ def verificar_correo(token):
         )
 
 
-# Reenviar correo de verificación
 @ventas_bp.route("/reenviar-verificacion", methods=["GET", "POST"])
 def reenviar_verificacion():
     
@@ -196,7 +190,6 @@ def reenviar_verificacion():
 
                     if usuario and not usuario["CorreoVerificado"]:
 
-                        # Invalidar tokens anteriores
                         conexion.execute(
                             text("""
                                 UPDATE verificacion_correo
@@ -209,7 +202,6 @@ def reenviar_verificacion():
                             }
                         )
 
-                        # Guardar el nuevo token
                         conexion.execute(
                             text("""
                                 INSERT INTO verificacion_correo
@@ -230,7 +222,6 @@ def reenviar_verificacion():
                             }
                         )
 
-                        # Enviar el correo antes de confirmar la transacción
                         resultado = enviar_correo_verificacion(
                             usuario["Correo"],
                             usuario["NombreCompleto"],
@@ -276,10 +267,6 @@ def reenviar_verificacion():
     )
 
 
-
-# Visitas: cada inicio de sesión abre una fila en `visita` y cada request
-# de ese usuario mueve fechaFin. Así la duración siempre refleja el último
-# instante de actividad real, aunque el navegador se cierre sin logout.
 def registrar_actividad_visita(conexion, id_visita):
 
     if not id_visita:
@@ -294,11 +281,7 @@ def registrar_actividad_visita(conexion, id_visita):
 
 @ventas_bp.route("/keepalive", methods=["POST"])
 def keepalive():
-    """Latido del navegador: mantiene viva la sesión mientras la pestaña está abierta.
-
-    La renovación de la expiración la hace validar_sesion_activa(); aquí
-    solo se responde OK. Sin sesión devuelve 401 para que el front avise.
-    """
+    """Latido del navegador para mantener viva la sesión abierta."""
     if "id_usuario" not in session:
         return jsonify(ok=False, expiro=True), 401
     return jsonify(ok=True)
@@ -350,7 +333,6 @@ def validar_sesion_activa():
                 session.clear()
                 return None
 
-            # Ventana deslizante: la actividad renuueva la expiración.
             conexion.execute(
                 text("""
                     UPDATE sesion_usuario
@@ -486,9 +468,6 @@ def login():
             mensaje_login="Ingresa tu correo y contraseña."
         )
 
-    # Los eventos de auditoría se acumulan y se registran fuera de la
-    # transacción: la FK de auditoria sobre usuario esperaría el lock
-    # que esta misma transacción mantiene abierto (deadlock).
     eventos = []
     respuesta = None
     id_usuario = None
@@ -581,9 +560,6 @@ def login():
 
                 nuevo_token = secrets.token_urlsafe(32)
 
-                # Una sesión muerta no puede bloquear el acceso: las filas
-                # caducadas, y las heredadas sin fechaExpiracion (anteriores
-                # a la migración), se depuran antes de buscar la activa.
                 conexion.execute(
                     text("""
                         DELETE FROM sesion_usuario
@@ -768,10 +744,6 @@ def registro_vendedor():
     )
 
 
-# ---------------------------------------------------------------
-# Carrito de compras de la página principal (estilo Dalliat)
-# ---------------------------------------------------------------
-
 DESCARGAS_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "descargas"
@@ -852,7 +824,6 @@ def descargar_pedido(nombre):
     if "id_usuario" not in session:
         return redirect(url_for("inicio"))
 
-    # El nombre solo puede ser el generado por el propio servidor.
     if not NOMBRE_PEDIDO_RE.fullmatch(nombre):
         return "Nombre de archivo inválido.", 400
 

@@ -9,7 +9,6 @@ function cargarEventListeners() {
     vaciarCarritoBtn.addEventListener('click', vaciarCarrito);
 }
 
-// Añadir animaciones a los botones
 document.querySelectorAll('.agregar-carrito').forEach(boton => {
     boton.addEventListener('click', () => {
         boton.classList.add('animated');

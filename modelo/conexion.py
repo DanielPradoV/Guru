@@ -22,7 +22,6 @@ engine_options = {
     "pool_recycle": 1800,
 }
 
-# Activar SSL únicamente para la conexión remota.
 if db_host != "127.0.0.1" and db_host != "localhost":
     engine_options["connect_args"] = {
         "ssl": {}

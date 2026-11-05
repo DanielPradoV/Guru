@@ -4,10 +4,6 @@ Uso:
     python scripts/crear_admin.py correo@dominio.com "ClaveSegura12"
     python scripts/crear_admin.py correo@dominio.com "ClaveSegura12" usuario "Nombre Apellido"
     python scripts/crear_admin.py --promover correo@dominio.com
-
-En Render (sin shell por defecto) se puede habilitar "Generate Deploy
-Endpoint" / Advanced → Root Shell y ejecutar el mismo comando, o crear el
-usuario desde /registro y luego promoverlo.
 """
 import argparse
 import sys
