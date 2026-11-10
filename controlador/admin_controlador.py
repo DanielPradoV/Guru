@@ -16,6 +16,7 @@ from werkzeug.security import generate_password_hash
 
 from modelo.conexion import engine
 
+from controlador.pronosticos import pronosticar_ingresos
 from controlador.seguridad import (
     CONFIGURACION,
     configuracion_seguridad,
@@ -29,6 +30,26 @@ from controlador.seguridad import (
 admin_bp = Blueprint("admin", __name__)
 
 DIAS_ESTADISTICAS = 14
+
+# Parámetros de los pronósticos de ingreso de usuarios.
+VENTANA_SMA_DEFECTO = 3
+ALPHA_SES_DEFECTO = 0.3
+HORIZONTE_DEFECTO = 7
+
+
+def _parametro_numerico(nombre, defecto, minimo, maximo, tipo=int):
+    """Lee un parámetro numérico del query string, acotado a [minimo, maximo].
+
+    Si falta o no es un número válido, devuelve el valor por defecto.
+    """
+    bruto = request.args.get(nombre)
+    if bruto is None:
+        return defecto
+    try:
+        valor = tipo(bruto.replace(",", ".") if tipo is float else bruto)
+    except (ValueError, TypeError):
+        return defecto
+    return max(minimo, min(maximo, valor))
 
 
 @admin_bp.route("/admin/usuarios")
@@ -436,6 +457,20 @@ def estadisticas():
     totales = dict(acumulado or {})
     totales["sesiones_activas"] = sesiones_activas
 
+    # Pronóstico de ingreso de usuarios (personas distintas por día).
+    ventana = _parametro_numerico("ventana", VENTANA_SMA_DEFECTO, 2, 7)
+    alpha = _parametro_numerico("alpha", ALPHA_SES_DEFECTO, 0.05, 1.0, float)
+    horizonte = _parametro_numerico("horizonte", HORIZONTE_DEFECTO, 1, 14)
+
+    pronostico = pronosticar_ingresos(
+        [float(p) for p in personas], ventana, alpha, horizonte
+    )
+
+    etiquetas_futuras = [
+        (hoy + timedelta(days=i)).strftime("%d/%m")
+        for i in range(1, horizonte + 1)
+    ]
+
     return render_template(
         "estadisticas.html",
         etiquetas=etiquetas,
@@ -446,6 +481,8 @@ def estadisticas():
         por_usuario=por_usuario,
         recientes=recientes,
         dias=DIAS_ESTADISTICAS,
+        pronostico=pronostico,
+        etiquetas_futuras=etiquetas_futuras,
     )
 
 

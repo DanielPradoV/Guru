@@ -56,6 +56,89 @@
                 <canvas id="grafica-visitas"></canvas>
             </div>
 
+            <h2>Predicción de ingreso de usuarios</h2>
+            <p class="subtitulo">
+                Proyección de personas distintas por día para los próximos
+                {{ pronostico.horizonte }} días, calculada con los últimos
+                {{ dias }} días de historial.
+            </p>
+
+            <form method="get" class="formulario-pronostico">
+                <label>
+                    Ventana SMA (días)
+                    <input type="number" name="ventana" min="2" max="7"
+                           value="{{ pronostico.ventana }}">
+                </label>
+                <label>
+                    Alfa SES (0.05 – 1)
+                    <input type="number" name="alpha" min="0.05" max="1"
+                           step="0.05" value="{{ pronostico.alpha }}">
+                </label>
+                <label>
+                    Días a predecir
+                    <input type="number" name="horizonte" min="1" max="14"
+                           value="{{ pronostico.horizonte }}">
+                </label>
+                <button type="submit">Recalcular</button>
+            </form>
+
+            <div class="tarjetas-metricas">
+                <div class="metrica">
+                    <span class="metrica-valor">
+                        {{ pronostico.sma.pronostico[0] }}
+                    </span>
+                    <span class="metrica-etiqueta">
+                        SMA({{ pronostico.ventana }}): mañana
+                    </span>
+                </div>
+                <div class="metrica">
+                    <span class="metrica-valor">
+                        {{ pronostico.ses.pronostico[0] }}
+                    </span>
+                    <span class="metrica-etiqueta">
+                        SES (α={{ pronostico.alpha }}): mañana
+                    </span>
+                </div>
+                <div class="metrica">
+                    <span class="metrica-valor">
+                        {{ pronostico.sma.mae if pronostico.sma.mae is not none else '—' }}
+                    </span>
+                    <span class="metrica-etiqueta">Error medio SMA (MAE)</span>
+                </div>
+                <div class="metrica">
+                    <span class="metrica-valor">
+                        {{ pronostico.ses.mae if pronostico.ses.mae is not none else '—' }}
+                    </span>
+                    <span class="metrica-etiqueta">Error medio SES (MAE)</span>
+                </div>
+            </div>
+
+            <div class="grafica-contenedor">
+                <canvas id="grafica-pronostico"></canvas>
+            </div>
+
+            <table class="lista">
+                <tr>
+                    <th>Día</th>
+                    <th>SMA({{ pronostico.ventana }})</th>
+                    <th>SES (α={{ pronostico.alpha }})</th>
+                </tr>
+                {% for dia in etiquetas_futuras %}
+                    <tr>
+                        <td>{{ dia }}</td>
+                        <td>{{ pronostico.sma.pronostico[loop.index0] }}</td>
+                        <td>{{ pronostico.ses.pronostico[loop.index0] }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <p class="nota-pronostico">
+                Los errores (MAE) se miden sobre el historial con
+                predicciones de un día adelante, en el mismo tramo para
+                ambos métodos. SES proyecta una línea plana porque no
+                modela tendencia ni estacionalidad; con pocos datos las
+                predicciones son orientativas.
+            </p>
+
             {% if por_usuario %}
                 <h2>Ranking de permanencia</h2>
                 <table class="lista">
@@ -142,6 +225,86 @@
                         position: 'right',
                         grid: { drawOnChartArea: false },
                         title: { display: true, text: 'Minutos' },
+                    },
+                },
+            },
+        });
+
+        // --- Predicción de ingreso de usuarios (SMA y SES) ---
+        const pron = {
+            futuras: {{ etiquetas_futuras | tojson }},
+            sma: {{ pronostico.sma | tojson }},
+            ses: {{ pronostico.ses | tojson }},
+            ventana: {{ pronostico.ventana | tojson }},
+            alpha: {{ pronostico.alpha | tojson }},
+        };
+
+        const nHistorial = datos.etiquetas.length;
+        const nFuturo = pron.futuras.length;
+        const relleno = (n) => new Array(n).fill(null);
+
+        // Real: solo histórico. Predicciones: ajuste histórico + futuro.
+        const real = datos.personas.concat(relleno(nFuturo));
+        const sma = pron.sma.ajuste.concat(pron.sma.pronostico);
+        const ses = pron.ses.ajuste.concat(pron.ses.pronostico);
+
+        // Segmentos de línea punteados solo en la zona de pronóstico.
+        const punteadoFuturo = (ctx) =>
+            ctx.p1DataIndex >= nHistorial ? [6, 4] : undefined;
+
+        new Chart(document.getElementById('grafica-pronostico'), {
+            type: 'line',
+            data: {
+                labels: datos.etiquetas.concat(pron.futuras),
+                datasets: [
+                    {
+                        label: 'Personas que entraron (real)',
+                        data: real,
+                        borderColor: '#e2ad1b',
+                        backgroundColor: '#e2ad1b',
+                        tension: 0.2,
+                    },
+                    {
+                        label: 'SMA(' + pron.ventana + ')',
+                        data: sma,
+                        borderColor: '#111111',
+                        backgroundColor: '#111111',
+                        tension: 0,
+                        pointRadius: 3,
+                        segment: { borderDash: punteadoFuturo },
+                    },
+                    {
+                        label: 'SES (α=' + pron.alpha + ')',
+                        data: ses,
+                        borderColor: '#8b6c15',
+                        backgroundColor: '#8b6c15',
+                        tension: 0,
+                        pointStyle: 'triangle',
+                        pointRadius: 4,
+                        segment: { borderDash: punteadoFuturo },
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => {
+                                const i = items[0].dataIndex;
+                                return items[0].label +
+                                    (i >= nHistorial ? ' (predicción)' : '');
+                            },
+                        },
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Personas por día' },
+                        ticks: { precision: 1 },
                     },
                 },
             },
